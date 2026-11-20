@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Ciudad Volumen</title>
+<meta name="description" content="RPG educativo de Razonamiento Matemático III: volúmenes de cuerpos regulares y compuestos, y sucesiones">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0e17;--panel:#1d1b33;--border:#e8e6f0;--text:#fffffe;--muted:#b8b5d1;--accent:#ffd447;--good:#5ce07a;--bad:#ff5d6c;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+body{min-height:100vh;display:flex;justify-content:center;padding:10px;}
+#wrap{width:100%;max-width:max(320px,min(760px,calc((100vh - 250px) * 4 / 3)));}
+#screen{position:relative;border:4px solid var(--border);border-radius:6px;overflow:hidden;background:#000;}
+canvas{display:block;width:100%;height:auto;image-rendering:pixelated;}
+#overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:16px;background:rgba(10,8,30,.84);}
+#overlay[hidden]{display:none}
+#overlay h1{font-family:"Press Start 2P",monospace;color:var(--accent);font-size:clamp(16px,4.5vw,30px);line-height:1.5;margin:0;text-shadow:3px 3px 0 #2a6cb3;}
+#overlay p{margin:0;color:var(--muted);font-size:clamp(12px,2.6vw,16px);max-width:520px;line-height:1.45}
+#overlay input{font-size:16px;padding:10px 12px;border-radius:4px;border:3px solid var(--border);background:#fff;color:#111;width:min(320px,90%);text-align:center}
+#mute{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.45);border:2px solid #fff;color:#fff;border-radius:4px;font-size:16px;padding:2px 6px;cursor:pointer;z-index:3}
+button{font-family:inherit;font-size:15px;cursor:pointer;border:3px solid var(--border);background:#3b3769;color:#fff;border-radius:4px;padding:8px 12px;}
+button:hover{background:#4f4a8c}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.5}
+button.main{background:#2a6cb3;font-family:"Press Start 2P",monospace;font-size:13px;padding:12px 16px}
+button.main:hover{background:#3a82d0}
+#ui{margin-top:8px;background:var(--panel);border:4px solid var(--border);border-radius:6px;padding:12px 14px;min-height:118px;font-size:16px;line-height:1.45;}
+.dlg{cursor:pointer;position:relative;padding-right:20px}
+.dlg > b{color:var(--accent);font-family:"Press Start 2P",monospace;font-size:11px;display:block;margin-bottom:6px}
+.dlg .nx{position:absolute;right:0;bottom:0;animation:blink 1s infinite;color:var(--accent)}
+@keyframes blink{50%{opacity:0}}
+.formula{display:inline-block;background:#fff6d6;color:#3a2a10;padding:2px 8px;border-radius:4px;font-weight:600;font-family:"Cambria Math","Times New Roman",serif;font-size:1.08em}
+.q{font-size:17px;margin-bottom:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+#ans{flex:1;min-width:120px;font-size:18px;padding:8px 10px;border-radius:4px;border:3px solid var(--border);}
+.btns button{font-size:14px;padding:6px 10px}
+.hintbox{margin-top:6px;color:#ffe9a3}
+.res{font-weight:700;margin-bottom:6px}
+.res.ok{color:var(--good)} .res.bad{color:var(--bad)}
+.sol{background:#2a2750;border-left:4px solid var(--accent);padding:8px 10px;border-radius:4px;margin:6px 0 10px;font-family:"Cambria Math","Times New Roman",serif;font-size:17px;line-height:1.7}
+.calc{margin-top:8px;padding:8px;background:#2a2750;border-radius:4px}
+.calc input{width:100%;font-size:15px;padding:6px 8px;border-radius:4px;border:2px solid #aaa;font-family:monospace}
+.calc small{color:var(--muted)}
+.calcout{font-family:monospace;font-size:17px;color:var(--accent);margin-top:4px;min-height:1.3em}
+.info .obj{color:var(--accent)}
+.info small{color:var(--muted)}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#pad{display:none;justify-content:space-between;align-items:center;margin-top:10px;user-select:none;-webkit-user-select:none;touch-action:none}
+#pad.on{display:flex}
+.dpad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);gap:4px}
+.dpad button,.abtn{font-size:22px;padding:0;touch-action:none}
+.dpad .u{grid-column:2;grid-row:1}.dpad .l{grid-column:1;grid-row:2}.dpad .r{grid-column:3;grid-row:2}.dpad .d{grid-column:2;grid-row:3}
+.abtn{width:76px;height:76px;border-radius:50%;background:#2a6cb3;font-family:"Press Start 2P",monospace;font-size:20px}
+.cert{background:#fff8e1;color:#3a2a10;border:6px double #b8860b;border-radius:8px;padding:16px 18px;max-width:540px}
+.cert h2{font-family:"Press Start 2P",monospace;font-size:clamp(12px,3vw,18px);color:#2a6cb3;margin:0 0 10px;line-height:1.5}
+.cert p{color:#3a2a10 !important}
+.cert table{margin:10px auto;border-collapse:collapse;font-size:15px}
+.cert td{padding:3px 10px;text-align:left}
+.cert td:last-child{font-weight:700;text-align:right}
+button,#pad,canvas{touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#overlay{overflow-y:auto;justify-content:safe center}
+#overlay h1{font-size:clamp(14px,min(4.5vw,6vh),30px)}
+/* Teclado numérico propio (pantallas táctiles) */
+.kp{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:8px}
+.kp button{padding:0;height:42px;font-size:18px;font-weight:700;background:#2a2750}
+.kp button.fx{background:#4a3f7a;font-size:16px}
+.kp button.del{background:#7a2f3a}
+.kp button.use{background:#2f7a45;font-size:13px}
+input.tgt{outline:3px solid var(--accent);outline-offset:1px}
+body.battle #pad{display:none}
+/* Fórmulas estandarizadas: fracciones apiladas */
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .12em;line-height:1.25}
+.fr>span{padding:0 .25em;white-space:nowrap}
+.fr>span:first-child{border-bottom:2px solid currentColor}
+.pp{font-size:1.5em;vertical-align:middle;font-weight:400;line-height:1}
+.sig{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1;margin:0 .15em}
+.sig small{font-size:.65em}
+.sig b{font-size:1.7em;font-weight:400;line-height:1}
+.formula.blk{display:block;width:fit-content;max-width:100%;margin:6px 0}
+.datos{font-size:15px;color:#cfe3ff;margin:0 0 6px}
+.datos b{color:#ff8a95}
+.sol small{display:block;font-family:monospace;font-size:13px;color:var(--muted);margin-top:6px;word-break:break-all;line-height:1.4}
+code{background:#2a2750;padding:1px 4px;border-radius:3px;word-break:break-all}
+/* Opciones con figuras (secuencias lógicas) */
+.opts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.opts button{padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;background:#f4e6c3;color:#3a2a10;font-weight:700}
+.opts button:hover{background:#fff3cf}
+.opts svg{width:100%;max-width:72px;height:auto}
+/* Misiones */
+.quests{margin-top:8px}
+.quests summary{cursor:pointer;font-size:15px}
+.quests summary b{color:var(--accent)}
+.qbar{height:8px;background:#444;border-radius:4px;overflow:hidden;margin:6px 0 2px}
+.qbar i{display:block;height:100%;background:var(--good)}
+.quests ul{list-style:none;padding:0;margin:6px 0 0;font-size:14px;line-height:1.6}
+.quests li.done{color:var(--muted);text-decoration:line-through}
+.quests li.cur{color:var(--accent);font-weight:600}
+.quests li small{color:var(--muted)}
+#bReset{background:#5a2f3a}
+#contBox{display:flex;flex-direction:column;align-items:center;gap:10px}
+/* Horizontal en celular/tablet: juego a la izquierda, panel y controles a la derecha */
+@media (orientation:landscape) and (pointer:coarse){
+  body{padding:6px;min-height:0;height:100vh;height:100dvh;overflow:hidden;align-items:center}
+  #wrap{--h:min(calc(100vh - 12px), calc((100vw - 330px) * .75));--h:min(calc(100dvh - 12px), calc((100vw - 330px) * .75));
+        max-width:none;width:100%;display:grid;grid-template-columns:calc(var(--h) * 4 / 3) minmax(0,400px);grid-template-rows:minmax(0,1fr) auto;
+        gap:8px;height:var(--h);justify-content:center}
+  #screen{grid-row:1 / 3;height:var(--h);width:calc(var(--h) * 4 / 3)}
+  #screen canvas{height:100%;width:100%}
+  #ui{margin:0;min-height:0;overflow-y:auto;padding:8px 10px;font-size:15px}
+  #pad{margin:0}
+  body.battle #ui{grid-row:1 / 3}
+  .dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}
+  .abtn{width:66px;height:66px}
+  .q{font-size:15px}
+  .btns button{font-size:13px;padding:5px 7px}
+  .kp button{height:36px;font-size:16px}
+  .sol{font-size:15px}
+  #overlay{gap:8px}
+  #overlay p{font-size:12px}
+  .cert{padding:8px 12px}.cert table{margin:4px auto;font-size:13px}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="screen">
+    <canvas id="cv" width="640" height="480"></canvas>
+    <button id="mute" title="Sonido">🔊</button>
+    <div id="overlay">
+      <h1>Ciudad<br>Volumen</h1>
+      <p>Un temblor dañó la ciudad. Como aprendiz de constructor, calcula <b>volúmenes</b> para reconstruirla y descifra las <b>sucesiones</b> que sellan el Barrio de los Patrones. 8 misiones, unos 40 minutos.</p>
+      <input id="nameIn" placeholder="Escribe tu nombre completo" maxlength="40" autocomplete="off">
+      <button class="main" id="startBtn">▶ COMENZAR</button>
+      <p style="font-size:13px">Muévete con flechas / WASD · Habla con Espacio o Enter · En celular usa los botones de abajo.<br>Necesitarás calculadora (el juego trae una).</p>
+    </div>
+  </div>
+  <div id="ui"></div>
+  <div id="pad">
+    <div class="dpad">
+      <button class="u" data-d="up">▲</button><button class="l" data-d="left">◀</button>
+      <button class="r" data-d="right">▶</button><button class="d" data-d="down">▼</button>
+    </div>
+    <button class="abtn" id="aBtn">A</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+// ======================= CONFIGURACIÓN =======================
+const TILE = 32, VW = 20, VH = 15;
+const HP_MAX = 30;          // energía del jugador
+const DANO = 6;             // energía que se pierde por respuesta incorrecta
+const SAVE_KEY = "ciudadVolumen.v1";
+
+// ======================= NOTACIÓN ESTANDARIZADA =======================
+// Multiplicación con "·", fracciones apiladas, A_b = área de la base,
+// r = radio, d = diámetro, h = altura, l = largo, a = ancho.
+const frac = (n,d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+const fm = (s, blk) => `<span class="formula${blk ? " blk" : ""}">${s}</span>`;
+const PAR = s => `<span class="pp">(</span>${s}<span class="pp">)</span>`;
+const Ab = "A<sub>b</sub>";
+const sub = (b, s) => `${b}<sub>${s}</sub>`;
+const SIG = (top, bot) => `<span class="sig"><small>${top}</small><b>Σ</b><small>${bot}</small></span>`;
+const F = {
+  prisma: `V = ${Ab} · h`,
+  rect: `V = l · a · h`,
+  triPrisma: `V = ${frac("b · h", "2")} · l`,
+  piramide: `V = ${frac("1","3")} · ${Ab} · h`,
+  cilindro: `V = π · r² · h`,
+  semicil: `V = ${frac("1","2")} · π · r² · h`,
+  esfera: `V = ${frac("4","3")} · π · r³`,
+  semiesf: `V = ${frac("2","3")} · π · r³`,
+  pitagoras: `c² = a² + b²`,
+  arit: `${sub("a","n")} = ${sub("a","1")} + (n − 1) · d`,
+  posicion: `n = ${frac(`${sub("a","n")} − ${sub("a","1")}`, "d")} + 1`,
+  geom: `${sub("a","n")} = ${sub("a","1")} · r<sup>n − 1</sup>`,
+  serie: `${sub("S","n")} = ${frac(`n · (${sub("a","1")} + ${sub("a","n")})`, "2")}`,
+};
+
+// ======================= TEXTOS =======================
+const STN_INFO = {
+  1: {who:"Maestra Itzel", place:"la bodega", tema:"Prismas", short:"La bodega: prismas"},
+  2: {who:"Ingeniero Tomás", place:"la torre de agua", tema:"Cilindros", short:"La torre de agua: cilindros"},
+  3: {who:"Astrónoma Luz", place:"el observatorio", tema:"Pirámides y esferas", short:"El observatorio: pirámide y esfera"},
+  4: {who:"Carpintero Beto", place:"el taller", tema:"Compuestas (suma)", short:"El taller: figuras compuestas (suma)"},
+  5: {who:"Escultora Mara", place:"el taller de piedra", tema:"Compuestas (resta)", short:"La pieza hueca: figuras compuestas (resta)"},
+  6: {who:"Guardiana Sofía", place:"la puerta del puente", tema:"Secuencias lógicas", short:"La puerta de los símbolos: secuencias lógicas"},
+  7: {who:"Puentero Iker", place:"el puente de los números", tema:"Sucesiones aritméticas", short:"El puente aritmético: sucesiones aritméticas"},
+  8: {who:"Guardián de la Escalera", place:"la escalera final", tema:"Geométricas y series", short:"La escalera final: geométricas y series"},
+};
+const TXT = {
+  intro: ["Un fuerte temblor sacudió Ciudad Volumen. Bodegas, torres y talleres quedaron dañados.",
+          "Tú eres aprendiz de constructor. Para reconstruir hay que saber CUÁNTO material cabe o se necesita: eso es el VOLUMEN.",
+          "Al norte, cruzando el río, está el Barrio de los Patrones. Sus puertas solo se abren descifrando SUCESIONES.",
+          "Son 8 misiones. La flecha amarilla te guía. Tu progreso se guarda solo en este navegador."],
+  lessons: {
+    1: ["¡Qué bueno que llegas! El temblor tiró la bodega y hay que volver a colarla en concreto.",
+        "Un PRISMA tiene dos bases iguales y paralelas. Su volumen es el área de la base por la altura:<br>" + fm(F.prisma),
+        "Si la base es un rectángulo: " + fm(F.rect) + "<br>Si la base es un triángulo: " + fm(F.triPrisma),
+        "¡Ojo con las unidades! Antes de operar, todo en la misma unidad: 1 m = 100 cm, así que 75 cm = 0.75 m. El volumen queda en unidades cúbicas: m³ o cm³.",
+        "Resuelve 3 cálculos para reconstruir la bodega."],
+    2: ["La torre de agua quedó vacía. Necesito saber cuánto le cabe.",
+        "Un CILINDRO es un prisma de base circular. El área de la base es π · r², así que:<br>" + fm(F.cilindro),
+        "Si te dan el DIÁMETRO, divídelo entre 2 para obtener el radio: r = d ÷ 2.",
+        "Medio cilindro (semicilindro) es la mitad:<br>" + fm(F.semicil),
+        "Usa π ≈ 3.1416 (la calculadora del juego tiene la tecla π). Redondea a 1 decimal."],
+    3: ["Desde el observatorio vemos el cielo... pero la pirámide de la entrada y la cúpula se agrietaron.",
+        "Una PIRÁMIDE cabe exactamente 3 veces en un prisma con la misma base y altura. Por eso:<br>" + fm(F.piramide),
+        "Una ESFERA se calcula solo con su radio:<br>" + fm(F.esfera),
+        "Una SEMIESFERA (cúpula) es la mitad de la esfera:<br>" + fm(F.semiesf),
+        "Recuerda: r³ = r · r · r. Redondea a 1 decimal."],
+    4: ["En mi taller casi nada tiene forma simple: hay casas, silos, piezas raras...",
+        "Una figura COMPUESTA se resuelve en cuatro pasos:<br>1. Descompón la figura en cuerpos simples.<br>2. Calcula el volumen de cada parte con SUS medidas.<br>3. Suma los volúmenes.<br>4. Verifica por otro camino.",
+        "Ejemplo: una casa = prisma rectangular (abajo) + prisma triangular (techo).",
+        "Si falta una altura y tienes un triángulo rectángulo, usa Pitágoras:<br>" + fm(F.pitagoras) + "<br>(c es la hipotenusa, el lado más largo).",
+        "Resuelve 3 figuras compuestas."],
+    5: ["Hago piezas de piedra con huecos: bloques perforados, tubos, escalones.",
+        "Cuando a un cuerpo le QUITAS una parte, el volumen es: volumen del cuerpo completo − volumen del hueco.",
+        "Verificación (paso 4): si la pieza tiene la misma cara de frente a fondo, V = (área de la cara frontal) · profundidad.",
+        "Un tubo es un cilindro grande menos un cilindro chico:<br>" + fm(`V = π · R² · h − π · r² · h`),
+        "Resuelve 3 piezas para terminar la obra."],
+    6: ["Alto. Esta puerta protege el Barrio de los Patrones.",
+        "Una SUCESIÓN es un conjunto ORDENADO de elementos (números o figuras) que siguen una regla. Cada elemento es un TÉRMINO.",
+        "Para descubrir la regla de una secuencia de figuras observa:<br>1. Cambios de forma (lados, vértices).<br>2. Giros (horario o antihorario).<br>3. Colores o cantidades.",
+        "Elige la figura que sigue. Resuelve 3 secuencias y te dejo pasar."],
+    7: ["¡Bienvenido al Barrio de los Patrones! Este puente se construye con números.",
+        "Una sucesión es ARITMÉTICA si siempre se SUMA la misma cantidad: la diferencia d.<br>Ejemplo: 2, 5, 8, 11, ... tiene d = 3.",
+        "Término general:<br>" + fm(F.arit) + "<br>a₁ es el primer término y n la posición.",
+        "Para saber en qué posición está un número, despeja n:<br>" + fm(F.posicion),
+        "Resuelve 3 retos para cruzar."],
+    8: ["Soy el Guardián de la Escalera. Cada escalón crece más rápido que el anterior...",
+        "Una sucesión es GEOMÉTRICA si siempre se MULTIPLICA por la misma cantidad: la razón r.<br>r = (un término) ÷ (el anterior).",
+        "Término general:<br>" + fm(F.geom),
+        "Una SERIE es la SUMA de los términos de una sucesión. Se escribe con sigma:<br>" + fm(`${SIG("n","i = 1")} ${sub("a","i")} = ${sub("a","1")} + ${sub("a","2")} + ··· + ${sub("a","n")}`),
+        "En una aritmética, la suma de los primeros n términos es:<br>" + fm(F.serie),
+        "Supera mis 4 retos y Ciudad Volumen quedará reconstruida."],
+  },
+  retry: k => [`¿Vamos de nuevo? Recuerda: puedes ver las fórmulas con el botón 📜 y pedir 💡 pistas.`],
+  thanks: {
+    1: ["¡La bodega quedó como nueva! Sigue con el Ingeniero Tomás en la torre de agua."],
+    2: ["¡La torre ya guarda agua otra vez! La Astrónoma Luz te espera en el observatorio."],
+    3: ["¡El observatorio brilla de nuevo! Ve al taller del Carpintero Beto (este)."],
+    4: ["¡Excelente trabajo en el taller! La Escultora Mara necesita ayuda con sus piezas huecas."],
+    5: ["¡Piezas perfectas! Ahora ve al puente del río: la Guardiana Sofía cuida la puerta."],
+    6: ["Puedes pasar. El Puentero Iker te espera al oeste del barrio."],
+    7: ["¡El puente está completo! Sube a la escalera final, al noreste."],
+    8: ["La ciudad está reconstruida. ¡Gracias, constructor!"],
+  },
+  locked: k => [`Todavía no puedo ayudarte. Primero completa la misión ${k-1}: ${STN_INFO[k-1].short}.`],
+  formulas: ["<b>Volumen de cuerpos regulares</b>" + fm(F.prisma,1) + fm(F.rect,1) + fm(F.triPrisma,1) + fm(F.piramide,1),
+             "<b>Cuerpos redondos</b>" + fm(F.cilindro,1) + fm(F.semicil,1) + fm(F.esfera,1) + fm(F.semiesf,1) + "r = d ÷ 2 · π ≈ 3.1416",
+             "<b>Figuras compuestas</b>: 1. Descompón. 2. Calcula cada parte. 3. Suma (o resta el hueco). 4. Verifica.<br>Pitágoras: " + fm(F.pitagoras) + "<br>Unidades: 1 m = 100 cm. Todo en la misma unidad antes de operar.",
+             "<b>Sucesiones</b><br>Aritmética (suma d): " + fm(F.arit,1) + fm(F.posicion,1) + "Geométrica (multiplica por r): " + fm(F.geom,1),
+             "<b>Series</b> (sumas): " + fm(`${SIG("n","i = 1")} ${sub("a","i")} = ${sub("a","1")} + ${sub("a","2")} + ··· + ${sub("a","n")}`,1) + fm(F.serie,1)],
+};
+
+// Rival de cada misión (reutiliza los dibujos de monstruos)
+const OPP = {
+  1: {name:"Cubo Travieso", hits:3, kind:"cube", color:"#e8a33d"},
+  2: {name:"Gota Glotona", hits:3, kind:"slime", color:"#4fa3ff"},
+  3: {name:"Búho Lunar", hits:3, kind:"bat", color:"#9b6ce0"},
+  4: {name:"Gólem de Ladrillo", hits:3, kind:"golem", color:"#b5603a"},
+  5: {name:"Fantasma Hueco", hits:3, kind:"ghost", color:"#cfe8ff"},
+  6: {name:"Slime Rúnico", hits:3, kind:"slime", color:"#c86bff"},
+  7: {name:"Murciélago Saltarín", hits:3, kind:"bat", color:"#5ce07a"},
+  8: {name:"Guardián de la Escalera", hits:4, kind:"golem", color:"#d4a017", boss:true},
+};
+
+// ======================= UTILIDADES =======================
+const $ = id => document.getElementById(id);
+let TOUCH = false;
+function detectTouch(){ return matchMedia("(pointer:coarse)").matches || "ontouchstart" in window; }
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const f1 = n => (Math.round(n*10)/10).toFixed(1);
+const nf = n => String(Math.round(n*100)/100);
+const pi1 = c => `${nf(c)}π`;                     // coeficiente·π
+
+// ======================= GENERADORES DE PROBLEMAS =======================
+// Cada problema: {kind:"num"|"choice", text, fig, datos, hints[2], sol, answer, tol, unit, ansTxt}
+const volTol = v => Math.max(0.06, Math.abs(v)*0.006);
+const clampDims = arr => { const m = Math.max(...arr); return arr.map(v => Math.max(v, 0.42*m)); };
+const datosV = (pairs, ask="V") => `<div class="datos">📐 Datos: ${pairs.join(" · ")} &nbsp;→&nbsp; Buscas: <b>${ask}</b></div>`;
+function numP(o){ return Object.assign({kind:"num", tol: volTol(o.answer)}, o); }
+
+// --- Misión 1: prismas ---
+function m1Rect(){
+  const l = rnd(4,12), a = rnd(2,8), h = rnd(2,9), V = l*a*h, [dl,da,dh] = clampDims([l,a,h]);
+  return numP({
+    text:`Un bloque de la bodega tiene forma de <b>prisma rectangular</b>. ¿Cuántos m³ de concreto se necesitan?`,
+    fig:{t:"ext", poly:[[0,0],[dl,0],[dl,dh],[0,dh]], D:da, labs:[{e:"b", t:`l = ${l} m`}, {e:"l", t:`h = ${h} m`}, {e:"d", t:`a = ${a} m`}]},
+    datos: datosV([`l = ${l} m`, `a = ${a} m`, `h = ${h} m`]),
+    hints:[fm(F.rect), fm(`V = ${l} · ${a} · ${h}`)],
+    sol:`V = l · a · h = ${l} · ${a} · ${h} = <b>${V} m³</b>`,
+    answer:V, unit:"m³", ansTxt:`V = ${V}`,
+  });
+}
+function m1Tri(){
+  const b = 2*rnd(1,5), ht = rnd(2,7), l = rnd(4,12), Ab_ = b*ht/2, V = Ab_*l, [db,dh,dl] = clampDims([b,ht,l]);
+  return numP({
+    text:`El techo de la bodega es un <b>prisma triangular</b>. Calcula su volumen en m³.`,
+    fig:{t:"ext", poly:[[0,0],[db,0],[db/2,dh]], D:dl, height:true, labs:[{e:"b", t:`b = ${b} m`}, {e:"hgt", t:`h = ${ht} m`}, {e:"d", t:`l = ${l} m`}]},
+    datos: datosV([`base del triángulo b = ${b} m`, `altura del triángulo h = ${ht} m`, `largo l = ${l} m`]),
+    hints:[fm(F.triPrisma), fm(`V = ${frac(`${b} · ${ht}`, "2")} · ${l}`)],
+    sol:`${Ab} = ${frac(`${b} · ${ht}`, "2")} = ${nf(Ab_)} m²<br>V = ${Ab} · l = ${nf(Ab_)} · ${l} = <b>${nf(V)} m³</b>`,
+    answer:V, unit:"m³", ansTxt:`V = ${nf(V)}`,
+  });
+}
+function m1Units(){
+  const l = rnd(3,9), acm = pick([25,40,50,60,75,80]), h = rnd(2,6), a = acm/100, V = l*a*h, [dl,da,dh] = clampDims([l,a,h]);
+  return numP({
+    text:`Una losa de la bodega mide ${l} m de largo, <b>${acm} cm</b> de ancho y ${h} m de alto. ¿Cuál es su volumen en <b>m³</b>? <i>(Observa las unidades)</i>`,
+    fig:{t:"ext", poly:[[0,0],[dl,0],[dl,dh],[0,dh]], D:da, labs:[{e:"b", t:`l = ${l} m`}, {e:"l", t:`h = ${h} m`}, {e:"d", t:`a = ${acm} cm`, k:"warn"}]},
+    datos: datosV([`l = ${l} m`, `a = <b>${acm} cm</b>`, `h = ${h} m`], "V en m³"),
+    hints:[fm(`${acm} cm = ${frac(acm, "100")} m = ${nf(a)} m`), fm(`V = ${l} · ${nf(a)} · ${h}`)],
+    sol:`Primero las unidades: ${acm} cm = ${nf(a)} m<br>V = l · a · h = ${l} · ${nf(a)} · ${h} = <b>${nf(V)} m³</b>`,
+    answer:V, tol: Math.max(0.011, V*0.006), unit:"m³", ansTxt:`V = ${nf(V)}`,
+  });
+}
+// --- Misión 2: cilindros ---
+function m2Cyl(){
+  const r = rnd(2,6), h = rnd(4,12), V = Math.PI*r*r*h;
+  return numP({
+    text:`El tanque de la torre es un <b>cilindro</b>. ¿Cuántos m³ de agua le caben? <i>(1 decimal)</i>`,
+    fig:{t:"cyl", r, h, rl:`r = ${r} m`, hl:`h = ${h} m`},
+    datos: datosV([`r = ${r} m`, `h = ${h} m`]),
+    hints:[fm(F.cilindro), fm(`V = π · ${r}² · ${h}`)],
+    sol:`V = π · r² · h = π · ${r}² · ${h} = π · ${r*r} · ${h} = ${pi1(r*r*h)} ≈ <b>${f1(V)} m³</b><small>En la calculadora: π*${r}^2*${h}</small>`,
+    answer:V, unit:"m³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+function m2Semi(){
+  const r = rnd(2,6), l = rnd(5,14), V = Math.PI*r*r*l/2, N = 24, poly = [];
+  const [dr2, dl] = clampDims([2*r, l]), dr = dr2/2;
+  for (let i=0;i<=N;i++){ const t = Math.PI*i/N; poly.push([dr + dr*Math.cos(t), dr*Math.sin(t)]); }
+  return numP({
+    text:`El canal que llena la torre es un <b>semicilindro</b> (medio cilindro acostado). Calcula su volumen en m³. <i>(1 decimal)</i>`,
+    fig:{t:"ext", poly, D:dl, smooth:true, rad:{c:[dr,0], r:dr, t:`r = ${r} m`}, labs:[{e:"d", t:`l = ${l} m`, i:0}]},
+    datos: datosV([`r = ${r} m`, `largo l = ${l} m`]),
+    hints:[fm(F.semicil.replace(" · h", " · l")), fm(`V = ${frac("1","2")} · π · ${r}² · ${l}`)],
+    sol:`V = ${frac("1","2")} · π · r² · l = ${frac("1","2")} · π · ${r*r} · ${l} = ${pi1(r*r*l/2)} ≈ <b>${f1(V)} m³</b><small>En la calculadora: π*${r}^2*${l}/2</small>`,
+    answer:V, unit:"m³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+function m2Diam(){
+  const d = 2*rnd(2,6), r = d/2, h = rnd(3,10), V = Math.PI*r*r*h;
+  return numP({
+    text:`Un depósito cilíndrico mide <b>${d} m de diámetro</b> y ${h} m de altura. ¿Cuál es su volumen en m³? <i>(1 decimal)</i>`,
+    fig:{t:"cyl", r, h, diam:true, rl:`d = ${d} m`, hl:`h = ${h} m`},
+    datos: datosV([`diámetro d = ${d} m`, `h = ${h} m`]),
+    hints:[fm(`r = d ÷ 2 = ${d} ÷ 2 = ${r} m`), fm(`V = π · ${r}² · ${h}`)],
+    sol:`r = ${d} ÷ 2 = ${r} m<br>V = π · r² · h = π · ${r*r} · ${h} = ${pi1(r*r*h)} ≈ <b>${f1(V)} m³</b><small>En la calculadora: π*${r}^2*${h}</small>`,
+    answer:V, unit:"m³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+// --- Misión 3: pirámide y esfera ---
+function m3Pyr(){
+  const sq = Math.random() < 0.5, l = rnd(3,10), a = sq ? l : rnd(3,10), h = rnd(4,12), Abv = l*a, V = Abv*h/3;
+  const [dl,da,dh] = clampDims([l,a,h]);
+  return numP({
+    text:`La entrada del observatorio es una <b>pirámide de base ${sq ? "cuadrada" : "rectangular"}</b>. Calcula su volumen en m³. <i>(1 decimal si hace falta)</i>`,
+    fig:{t:"pyr", L:dl, D:da, H:dh, ll:`l = ${l} m`, al:`a = ${a} m`, hl:`h = ${h} m`},
+    datos: datosV([`base ${l} m × ${a} m`, `altura h = ${h} m`]),
+    hints:[fm(F.piramide + `,&nbsp; ${Ab} = l · a`), fm(`V = ${frac("1","3")} · ${l} · ${a} · ${h}`)],
+    sol:`${Ab} = ${l} · ${a} = ${Abv} m²<br>V = ${frac("1","3")} · ${Ab} · h = ${frac(`${Abv} · ${h}`, "3")} = ${frac(Abv*h, "3")} ≈ <b>${f1(V)} m³</b>`,
+    answer:V, unit:"m³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+function m3Sph(){
+  const r = rnd(2,9), V = 4/3*Math.PI*r**3, u = pick(["m","cm"]);
+  return numP({
+    text:`En el observatorio hay un globo terráqueo con forma de <b>esfera</b>. ¿Cuál es su volumen en ${u}³? <i>(1 decimal)</i>`,
+    fig:{t:"sph", r, rl:`r = ${r} ${u}`},
+    datos: datosV([`r = ${r} ${u}`]),
+    hints:[fm(F.esfera), fm(`V = ${frac("4","3")} · π · ${r}³`)],
+    sol:`r³ = ${r} · ${r} · ${r} = ${r**3}<br>V = ${frac("4","3")} · π · ${r**3} = ${frac(`4 · ${r**3}`, "3")} · π ≈ <b>${f1(V)} ${u}³</b><small>En la calculadora: 4/3*π*${r}^3</small>`,
+    answer:V, unit:`${u}³`, ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+function m3Hemi(){
+  const r = rnd(3,10), V = 2/3*Math.PI*r**3;
+  return numP({
+    text:`La cúpula del observatorio es una <b>semiesfera</b> (media esfera). ¿Cuántos m³ de aire hay dentro? <i>(1 decimal)</i>`,
+    fig:{t:"sph", r, half:true, rl:`r = ${r} m`},
+    datos: datosV([`r = ${r} m`]),
+    hints:[fm(F.semiesf), fm(`V = ${frac("2","3")} · π · ${r}³`)],
+    sol:`r³ = ${r**3}<br>V = ${frac("2","3")} · π · ${r**3} = ${frac(`2 · ${r**3}`, "3")} · π ≈ <b>${f1(V)} m³</b><small>En la calculadora: 2/3*π*${r}^3</small>`,
+    answer:V, unit:"m³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+// --- Misión 4: compuestas por suma ---
+function houseFig(a, h1, h2, l, labs, h2lab){
+  const [da, dh1, dl] = clampDims([a, h1, l]), dh2 = Math.max(h2/a*da, 0.3*dh1);
+  return {t:"ext", poly:[[0,0],[da,0],[da,dh1],[da/2,dh1+dh2],[0,dh1]], D:dl, labs, roof:{x:da/2, y0:dh1, y1:dh1+dh2, t:h2lab}};
+}
+function m4House(){
+  const a = 2*rnd(2,5), h1 = rnd(2,5), h2 = rnd(1,4), l = rnd(5,12);
+  const V1 = a*h1*l, Ar = a*h2/2, V2 = Ar*l, V = V1 + V2;
+  return numP({
+    text:`Calcula el volumen de la casa del taller: <b>prisma rectangular + techo de prisma triangular</b> (m³).`,
+    fig: houseFig(a, h1, h2, l, [{e:"b", t:`a = ${a} m`}, {e:"l", t:`h₁ = ${h1} m`}, {e:"d", t:`l = ${l} m`}], `h₂ = ${h2} m`),
+    datos: datosV([`ancho a = ${a} m`, `pared h₁ = ${h1} m`, `techo h₂ = ${h2} m`, `largo l = ${l} m`]),
+    hints:[fm(`V = (a · h₁ · l) + ${PAR(frac("a · h₂","2"))} · l`), fm(`V = (${a} · ${h1} · ${l}) + ${frac(`${a} · ${h2}`,"2")} · ${l}`)],
+    sol:`Prisma rectangular: V₁ = ${a} · ${h1} · ${l} = ${V1} m³<br>Techo: ${Ab} = ${frac(`${a} · ${h2}`,"2")} = ${nf(Ar)} m², V₂ = ${nf(Ar)} · ${l} = ${nf(V2)} m³<br>Total: V = ${V1} + ${nf(V2)} = <b>${nf(V)} m³</b><br>✓ Verificación: cara frontal = ${a}·${h1} + ${nf(Ar)} = ${nf(a*h1+Ar)} m², y ${nf(a*h1+Ar)} · ${l} = ${nf(V)} m³`,
+    answer:V, unit:"m³", ansTxt:`V = ${nf(V)}`,
+  });
+}
+function m4Silo(){
+  const r = rnd(2,5), h = rnd(5,12), V1 = Math.PI*r*r*h, V2 = 2/3*Math.PI*r**3, V = V1 + V2;
+  return numP({
+    text:`El silo de granos es un <b>cilindro con una semiesfera</b> encima. ¿Cuál es su volumen total en m³? <i>(1 decimal)</i>`,
+    fig:{t:"silo", r, h, rl:`r = ${r} m`, hl:`h = ${h} m`},
+    datos: datosV([`r = ${r} m (cilindro y semiesfera)`, `altura del cilindro h = ${h} m`]),
+    hints:[fm(`V = π · r² · h + ${frac("2","3")} · π · r³`), fm(`V = π · ${r}² · ${h} + ${frac("2","3")} · π · ${r}³`)],
+    sol:`Cilindro: V₁ = π · ${r*r} · ${h} ≈ ${f1(V1)} m³<br>Semiesfera: V₂ = ${frac("2","3")} · π · ${r**3} ≈ ${f1(V2)} m³<br>Total: V ≈ ${f1(V1)} + ${f1(V2)} ≈ <b>${f1(V)} m³</b><small>En la calculadora: π*${r}^2*${h}+2/3*π*${r}^3</small>`,
+    answer:V, unit:"m³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+function m4Pyth(){
+  const [h2, half, s] = pick([[3,4,5],[4,3,5],[6,8,10],[8,6,10],[5,12,13]]);
+  const a = 2*half, h1 = rnd(3,6), l = rnd(5,12), V1 = a*h1*l, Ar = a*h2/2, V2 = Ar*l, V = V1 + V2;
+  const f = houseFig(a, h1, h2, l, [{e:"b", t:`a = ${a} m`}, {e:"l", t:`h₁ = ${h1} m`}, {e:"d", t:`l = ${l} m`}, {e:"slope", t:`${s} m`}], "h₂ = ?");
+  return numP({
+    text:`En esta casa no se conoce la altura del techo, pero cada lado inclinado mide ${s} m. Encuentra h₂ con Pitágoras y luego el <b>volumen total</b> (m³).`,
+    fig: f,
+    datos: datosV([`a = ${a} m`, `h₁ = ${h1} m`, `l = ${l} m`, `lado inclinado = ${s} m`], "h₂ y luego V"),
+    hints:[fm(`h₂ = √${PAR(`${s}² − ${half}²`)}`) + " (la mitad del ancho es " + half + " m)", fm(`V = (${a} · ${h1} · ${l}) + ${frac(`${a} · ${h2}`,"2")} · ${l}`)],
+    sol:`Pitágoras con la mitad del ancho (${half} m): h₂ = √(${s}² − ${half}²) = √(${s*s} − ${half*half}) = √${h2*h2} = ${h2} m<br>V₁ = ${a} · ${h1} · ${l} = ${V1} m³ · V₂ = ${frac(`${a} · ${h2}`,"2")} · ${l} = ${nf(V2)} m³<br>Total: V = ${V1} + ${nf(V2)} = <b>${nf(V)} m³</b>`,
+    answer:V, unit:"m³", ansTxt:`V = ${nf(V)}`,
+  });
+}
+// --- Misión 5: compuestas por resta ---
+function m5Hole(){
+  const L = rnd(5,10), A = rnd(5,10), H = rnd(2,6), r = rnd(1, Math.floor(Math.min(L,A)/2) - 1 || 1);
+  const Vb = L*A*H, Vh = Math.PI*r*r*H, V = Vb - Vh;
+  return numP({
+    text:`Un bloque de piedra (prisma rectangular) tiene un <b>hueco cilíndrico</b> que lo atraviesa de arriba abajo. ¿Cuánta piedra queda? (cm³, 1 decimal)`,
+    fig:{t:"hole", L, A, H, r, ll:`l = ${L} cm`, al:`a = ${A} cm`, hl:`h = ${H} cm`, rl:`r = ${r} cm`},
+    datos: datosV([`bloque ${L} × ${A} × ${H} cm`, `radio del hueco r = ${r} cm`]),
+    hints:[fm(`V = l · a · h − π · r² · h`), fm(`V = ${L} · ${A} · ${H} − π · ${r}² · ${H}`)],
+    sol:`Bloque completo: ${L} · ${A} · ${H} = ${Vb} cm³<br>Hueco: π · ${r*r} · ${H} ≈ ${f1(Vh)} cm³<br>V ≈ ${Vb} − ${f1(Vh)} ≈ <b>${f1(V)} cm³</b><small>En la calculadora: ${L}*${A}*${H}-π*${r}^2*${H}</small>`,
+    answer:V, unit:"cm³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+function m5Step(){
+  const w1 = rnd(2,5), w2 = rnd(2,5), h1 = rnd(4,8), h2 = rnd(1,h1-2), D = rnd(3,9), W = w1+w2;
+  const Vfull = W*h1*D, Vcut = w2*(h1-h2)*D, V = Vfull - Vcut, cara = w1*h1 + w2*h2;
+  const [dW, dh1, dD] = clampDims([W, h1, D]), sx = dW/W, dw1 = w1*sx, dh2 = h2*dh1/h1;
+  return numP({
+    text:`A un prisma rectangular se le recortó un escalón. Calcula el volumen de la pieza (m³).`,
+    fig:{t:"ext", poly:[[0,0],[dW,0],[dW,dh2],[dw1,dh2],[dw1,dh1],[0,dh1]], D:dD,
+         labs:[{e:"b", t:`${W} m`}, {e:"l", t:`${h1} m`}, {e:"d", t:`${D} m`}, {e:"e", i:3, t:`${w1} m`}, {e:"e", i:2, t:`${h2} m`}]},
+    datos: datosV([`ancho total ${W} m`, `alto ${h1} m`, `parte alta ${w1} m de ancho`, `escalón ${h2} m de alto`, `fondo ${D} m`]),
+    hints:[fm(`V = (bloque completo) − (recorte)`), fm(`V = ${W} · ${h1} · ${D} − ${w2} · ${h1-h2} · ${D}`)],
+    sol:`Bloque completo: ${W} · ${h1} · ${D} = ${Vfull} m³<br>Recorte: ${w2} · ${h1-h2} · ${D} = ${Vcut} m³ (ancho ${W} − ${w1} = ${w2}, alto ${h1} − ${h2} = ${h1-h2})<br>V = ${Vfull} − ${Vcut} = <b>${V} m³</b><br>✓ Verificación: cara frontal = ${w1}·${h1} + ${w2}·${h2} = ${cara} m², y ${cara} · ${D} = ${V} m³`,
+    answer:V, unit:"m³", ansTxt:`V = ${V}`,
+  });
+}
+function m5Tube(){
+  const R = rnd(4,9), r = rnd(2, R-1), h = rnd(5,15), V = Math.PI*(R*R - r*r)*h;
+  return numP({
+    text:`Un tubo de concreto es un <b>cilindro hueco</b>. ¿Cuánto concreto lleva? (cm³, 1 decimal)`,
+    fig:{t:"tube", R, r, h, Rl:`R = ${R} cm`, rl:`r = ${r} cm`, hl:`h = ${h} cm`},
+    datos: datosV([`radio exterior R = ${R} cm`, `radio interior r = ${r} cm`, `h = ${h} cm`]),
+    hints:[fm(`V = π · R² · h − π · r² · h`), fm(`V = π · ${R}² · ${h} − π · ${r}² · ${h}`)],
+    sol:`Cilindro grande: π · ${R*R} · ${h} = ${pi1(R*R*h)}<br>Hueco: π · ${r*r} · ${h} = ${pi1(r*r*h)}<br>V = ${pi1(R*R*h)} − ${pi1(r*r*h)} = ${pi1((R*R-r*r)*h)} ≈ <b>${f1(V)} cm³</b><small>En la calculadora: π*${R}^2*${h}-π*${r}^2*${h}</small>`,
+    answer:V, unit:"cm³", ansTxt:`V ≈ ${f1(V)}`,
+  });
+}
+// --- Misión 6: secuencias lógicas visuales ---
+const COLS = ["#e63946","#2a6cb3","#2a9d8f","#f4a261","#8e44ad"];
+function choiceP(text, shapes, correct, wrongs, hints, sol){
+  const opts = shuffle([{s:correct, ok:true}, ...wrongs.map(s => ({s, ok:false}))]);
+  const L = "ABCD", ci = opts.findIndex(o => o.ok);
+  return {kind:"choice", text, fig:{t:"vseq", shapes}, opts, answer:ci, hints, sol, unit:"", ansTxt:`la opción ${L[ci]}`,
+          datos:`<div class="datos">Elige la figura que va en el lugar del <b>?</b></div>`};
+}
+function m6Sides(){
+  const n0 = rnd(3,4), c = pick(COLS), sh = n => ({n, rot:0, fill:c});
+  return choiceP(`¿Qué figura sigue en la secuencia?`, [sh(n0), sh(n0+1), sh(n0+2), null],
+    sh(n0+3), [sh(n0+2), sh(n0+4), sh(n0+1)],
+    ["Cuenta los LADOS de cada figura.", `Los lados van ${n0}, ${n0+1}, ${n0+2}, ... ¿cuántos siguen?`],
+    `Patrón: cada figura tiene <b>un lado más</b> que la anterior (${n0}, ${n0+1}, ${n0+2}, <b>${n0+3}</b>).`);
+}
+function m6Arrow(){
+  const step = pick([45, 90, -45, -90]), a0 = pick([0, 45, 90, 180]), c = pick(COLS);
+  const ar = k => ({arrow:true, rot:(a0 + k*step + 720) % 360, fill:c});
+  const sentido = step > 0 ? "horario (como las manecillas del reloj)" : "antihorario";
+  return choiceP(`La flecha gira siguiendo una regla. ¿Cómo queda en el siguiente paso?`, [ar(0), ar(1), ar(2), ar(3), null],
+    ar(4), [ar(3), ar(5), {arrow:true, rot:(a0 + 4*step + 180 + 720) % 360, fill:c}],
+    ["Observa cuánto gira la flecha de un paso al siguiente, y en qué sentido.", `Gira ${Math.abs(step)}° en sentido ${step > 0 ? "horario" : "antihorario"} en cada paso.`],
+    `Patrón: la flecha gira <b>${Math.abs(step)}°</b> en sentido ${sentido} en cada paso.`);
+}
+function m6Dots(){
+  if (Math.random() < 0.5){
+    const d = pick([1,2]), s0 = rnd(1,2), c = pick(COLS), dt = k => ({dots:s0 + k*d, fill:c});
+    return choiceP(`¿Cuántos puntos tendrá la siguiente figura?`, [dt(0), dt(1), dt(2), null],
+      dt(3), [dt(2), {dots:s0+3*d+1, fill:c}, {dots:s0+3*d+2, fill:c}],
+      ["Cuenta los puntos de cada figura.", `Cada vez se agregan ${d} punto${d>1?"s":""}.`],
+      `Patrón: se agregan <b>${d}</b> punto${d>1?"s":""} cada vez: ${s0}, ${s0+d}, ${s0+2*d}, <b>${s0+3*d}</b>.`);
+  }
+  const c = pick(COLS), dt = k => ({dots:2**k, fill:c});
+  return choiceP(`¿Cuántos puntos tendrá la siguiente figura?`, [dt(0), dt(1), dt(2), null],
+    dt(3), [{dots:6, fill:c}, {dots:7, fill:c}, {dots:10, fill:c}],
+    ["Cuenta los puntos: 1, 2, 4, ... ¿se suma o se multiplica?", "Cada figura tiene el DOBLE de puntos que la anterior."],
+    `Patrón: los puntos se <b>duplican</b>: 1, 2, 4, <b>8</b>.`);
+}
+function m6Color(){
+  const cs = shuffle(COLS.slice()).slice(0,3), n = pick([3,4]), rs = n === 3 ? [0,180] : [0,45];
+  const sh = k => ({n, rot:rs[k%2], fill:cs[k%3]});
+  const ans = sh(5);
+  return choiceP(`Observa el color y la posición. ¿Qué figura sigue?`, [sh(0), sh(1), sh(2), sh(3), sh(4), null],
+    ans, shuffle(rs.flatMap(rot => cs.map(fill => ({n, rot, fill}))).filter(o => !(o.rot === ans.rot && o.fill === ans.fill))).slice(0,3),
+    ["Hay DOS patrones a la vez: uno de color y otro de posición.", "Los colores se repiten cada 3 figuras; la posición se alterna cada 2."],
+    `Patrón doble: los colores se repiten en ciclo de 3 y la figura se alterna entre dos posiciones. La sexta figura repite el color de la tercera y la posición de la segunda.`);
+}
+// --- Misión 7: aritméticas ---
+const seqItems = (terms, askIdx, labs) => terms.map((v,i) => ({v: i === askIdx ? "?" : String(v), ask: i === askIdx, lab: labs ? labs[i] : ["a", String(i+1)]}));
+function m7Next(){
+  let a1 = rnd(-6, 20), d = pick([-7,-5,-4,-3,-2,2,3,4,5,6,7,8,9]);
+  const ask = pick([2,3,4]), terms = [0,1,2,3,4].map(i => a1 + i*d), V = terms[ask];
+  return numP({
+    text:`Completa la sucesión aritmética: ¿qué número va en el lugar del <b>?</b>`,
+    fig:{t:"seq", items: seqItems(terms, ask)},
+    datos:`<div class="datos">📐 Sucesión: ${terms.map((v,i) => i === ask ? "<b>?</b>" : v).join(", ")}, ...</div>`,
+    hints:["Calcula la diferencia d restando dos términos seguidos.", fm(`d = ${terms[ask === 0 ? 2 : 1]} − ${terms[ask === 0 ? 1 : 0]} = ${d}`)],
+    sol:`La diferencia es d = ${d} (se ${d > 0 ? "suma" : "resta"} ${Math.abs(d)} cada vez).<br>${sub("a", ask+1)} = ${terms[ask-1]} ${d > 0 ? "+" : "−"} ${Math.abs(d)} = <b>${V}</b>`,
+    answer:V, tol:0.01, unit:"", ansTxt:`${V}`,
+  });
+}
+function m7Gen(){
+  const a1 = rnd(-5, 15), d = pick([2,3,4,5,6,7,-2,-3,-4]), n = rnd(12, 40), terms = [0,1,2,3].map(i => a1 + i*d), V = a1 + (n-1)*d;
+  const items = seqItems(terms, -1).concat([{gap:true}, {v:"?", ask:true, lab:["a", String(n)]}]);
+  return numP({
+    text:`Para la sucesión ${terms.join(", ")}, ... encuentra el término <b>${sub("a", n)}</b> (el que está en la posición ${n}).`,
+    fig:{t:"seq", items},
+    datos:`<div class="datos">📐 a₁ = ${a1} · d = ? · n = ${n} &nbsp;→&nbsp; Buscas: <b>${sub("a", n)}</b></div>`,
+    hints:[fm(F.arit) + ` con d = ${terms[1]} − ${terms[0]} = ${d}`, fm(`${sub("a",n)} = ${a1} + (${n} − 1) · ${d < 0 ? `(${d})` : d}`)],
+    sol:`d = ${terms[1]} − ${terms[0]} = ${d}<br>${sub("a",n)} = ${a1} + (${n} − 1) · ${d < 0 ? `(${d})` : d} = ${a1} + ${n-1} · ${d < 0 ? `(${d})` : d} = ${a1} ${(n-1)*d < 0 ? "−" : "+"} ${Math.abs((n-1)*d)} = <b>${V}</b>`,
+    answer:V, tol:0.01, unit:"", ansTxt:`${sub("a",n)} = ${V}`,
+  });
+}
+function m7Pos(){
+  const a1 = rnd(-4, 12), d = pick([2,3,4,5,6,7,9]), n = rnd(8, 35), X = a1 + (n-1)*d, terms = [0,1,2,3].map(i => a1 + i*d);
+  const items = seqItems(terms, -1).concat([{gap:true}, {v:String(X), lab:["a","n"], ask:true, note:"n = ?"}]);
+  return numP({
+    text:`En la sucesión ${terms.join(", ")}, ... ¿en qué <b>posición n</b> aparece el número ${X}?`,
+    fig:{t:"seq", items},
+    datos:`<div class="datos">📐 a₁ = ${a1} · d = ? · ${sub("a","n")} = ${X} &nbsp;→&nbsp; Buscas: <b>n</b></div>`,
+    hints:[fm(F.posicion) + ` con d = ${d}`, fm(`n = ${frac(`${X} − ${a1 < 0 ? `(${a1})` : a1}`, d)} + 1`)],
+    sol:`d = ${terms[1]} − ${terms[0]} = ${d}<br>n = ${frac(`${X} − ${a1 < 0 ? `(${a1})` : a1}`, d)} + 1 = ${frac(X - a1, d)} + 1 = ${n-1} + 1 = <b>${n}</b>`,
+    answer:n, tol:0.01, unit:"", ansTxt:`n = ${n}`,
+  });
+}
+// --- Misión 8: geométricas y series ---
+function m8Next(){
+  let a1, r;
+  if (Math.random() < 0.3){ a1 = pick([64,96,128,160,192]); r = 0.5; }
+  else { r = pick([2,3]); a1 = r === 3 ? rnd(1,3) : rnd(1,6); }
+  const terms = [0,1,2,3,4].map(i => a1 * r**i), V = terms[4];
+  return numP({
+    text:`Esta sucesión es <b>geométrica</b>. ¿Qué número sigue?`,
+    fig:{t:"seq", items: seqItems(terms, 4)},
+    datos:`<div class="datos">📐 Sucesión: ${terms.slice(0,4).join(", ")}, <b>?</b></div>`,
+    hints:["Divide un término entre el anterior para hallar la razón r.", fm(`r = ${frac(terms[1], terms[0])} = ${r === 0.5 ? frac(1,2) : r}`)],
+    sol:`r = ${terms[1]} ÷ ${terms[0]} = ${nf(r)} (cada término se multiplica por ${r === 0.5 ? frac(1,2) : r}).<br>${sub("a",5)} = ${terms[3]} · ${nf(r)} = <b>${V}</b>`,
+    answer:V, tol:0.01, unit:"", ansTxt:`${V}`,
+  });
+}
+function m8Gen(){
+  const r = pick([2,3]), a1 = r === 3 ? pick([1,2,3]) : pick([1,2,3,5]), n = r === 3 ? rnd(5,7) : rnd(6,9), V = a1 * r**(n-1);
+  const terms = [0,1,2].map(i => a1 * r**i);
+  const items = seqItems(terms, -1).concat([{gap:true}, {v:"?", ask:true, lab:["a", String(n)]}]);
+  return numP({
+    text:`Para la sucesión geométrica ${terms.join(", ")}, ... calcula ${sub("a", n)}.`,
+    fig:{t:"seq", items},
+    datos:`<div class="datos">📐 a₁ = ${a1} · r = ? · n = ${n} &nbsp;→&nbsp; Buscas: <b>${sub("a", n)}</b></div>`,
+    hints:[fm(F.geom) + ` con r = ${terms[1]} ÷ ${terms[0]} = ${r}`, fm(`${sub("a",n)} = ${a1} · ${r}<sup>${n} − 1</sup> = ${a1} · ${r}<sup>${n-1}</sup>`)],
+    sol:`r = ${terms[1]} ÷ ${terms[0]} = ${r}<br>${sub("a",n)} = ${a1} · ${r}<sup>${n-1}</sup> = ${a1} · ${r**(n-1)} = <b>${V}</b><small>En la calculadora: ${a1}*${r}^${n-1}</small>`,
+    answer:V, tol:0.01, unit:"", ansTxt:`${sub("a",n)} = ${V}`,
+  });
+}
+function m8Serie(){
+  const a1 = rnd(1,9), d = rnd(2,6), n = rnd(6,10), an = a1 + (n-1)*d, S = n*(a1+an)/2, terms = [0,1,2,3].map(i => a1 + i*d);
+  const items = seqItems(terms, -1).concat([{gap:true}, {v:String(an), lab:["a", String(n)]}]);
+  return numP({
+    text:`Calcula la <b>suma de los primeros ${n} términos</b> de la sucesión ${terms.join(", ")}, ... (el término ${n} es ${an}).`,
+    fig:{t:"seq", items, title:`Suma de los primeros ${n} términos = ?`},
+    datos:`<div class="datos">📐 a₁ = ${a1} · ${sub("a",n)} = ${an} · n = ${n} &nbsp;→&nbsp; Buscas: <b>${sub("S",n)}</b></div>`,
+    hints:[fm(F.serie), fm(`${sub("S",n)} = ${frac(`${n} · (${a1} + ${an})`, "2")}`)],
+    sol:`${sub("S",n)} = ${frac(`${n} · (${a1} + ${an})`, "2")} = ${frac(`${n} · ${a1+an}`, "2")} = ${frac(n*(a1+an), "2")} = <b>${S}</b><br>✓ También puedes sumar término a término: ${Array.from({length:n}, (_,i) => a1+i*d).join(" + ")} = ${S}`,
+    answer:S, tol:0.01, unit:"", ansTxt:`${sub("S",n)} = ${S}`,
+  });
+}
+function m8Sigma(){
+  const p = rnd(2,5), q = rnd(-3,5), n = rnd(4,6), terms = Array.from({length:n}, (_,i) => p*(i+1)+q), S = terms.reduce((s,v) => s+v, 0);
+  const expr = `${p}·i ${q < 0 ? "−" : "+"} ${Math.abs(q)}`;
+  return numP({
+    text:`Calcula el valor de la serie ${SIG(n, "i = 1")} (${expr}).`,
+    fig:{t:"sig", n, expr},
+    datos:`<div class="datos">📐 Sustituye i = 1, 2, ..., ${n} y suma los resultados.</div>`,
+    hints:[`Sustituye i = 1: ${p}·1 ${q < 0 ? "−" : "+"} ${Math.abs(q)} = ${terms[0]}; luego i = 2, i = 3, ... hasta i = ${n}.`, fm(terms.join(" + "))],
+    sol:`i = 1, 2, ..., ${n} → ${terms.join(", ")}<br>${SIG(n, "i = 1")} (${expr}) = ${terms.join(" + ")} = <b>${S}</b>`,
+    answer:S, tol:0.01, unit:"", ansTxt:`${S}`,
+  });
+}
+// Orden de los retos en cada misión (el reto i usa GEN[k][i]; si fallas, se genera otro del mismo tipo)
+const GEN = {
+  1:[m1Rect, m1Tri, m1Units], 2:[m2Cyl, m2Semi, m2Diam], 3:[m3Pyr, m3Sph, m3Hemi], 4:[m4House, m4Silo, m4Pyth],
+  5:[m5Hole, m5Step, m5Tube], 6:[m6Sides, m6Arrow, () => Math.random() < 0.5 ? m6Dots() : m6Color()],
+  7:[m7Next, m7Gen, m7Pos], 8:[m8Next, m8Gen, m8Serie, m8Sigma],
+};
+
+// ======================= MAPA =======================
+const MW = 40, MH = 26;
+const map = Array.from({length:MH}, (_,y) => Array.from({length:MW}, (_,x) => (x===0 || y===0 || x===MW-1 || y===MH-1) ? "#" : "."));
+const setT = (x,y,c) => { map[y][x] = c; };
+const hline = (y,x1,x2,c="_") => { for (let x=x1; x<=x2; x++) setT(x,y,c); };
+const vline = (x,y1,y2,c="_") => { for (let y=y1; y<=y2; y++) setT(x,y,c); };
+const rect = (x1,y1,x2,y2,c) => { for (let y=y1; y<=y2; y++) hline(y,x1,x2,c); };
+hline(9,1,MW-2,"~"); hline(10,1,MW-2,"~"); setT(20,9,"="); setT(20,10,"=");          // río y puente
+hline(20,3,36); vline(20,11,20); vline(9,15,20); vline(34,14,20); hline(14,20,34);     // barrio sur (volúmenes)
+vline(20,3,8); hline(5,7,20); hline(3,20,33);                                           // barrio norte (patrones)
+rect(12,22,14,23,"H"); rect(24,22,26,23,"H"); rect(3,12,5,13,"H"); rect(11,1,13,2,"H"); rect(24,6,26,7,"H"); rect(29,16,31,17,"H");
+// Estaciones (NPC de cada misión); la obra se dibuja una casilla arriba del NPC
+const STN = {1:[9,14], 2:[15,19], 3:[27,19], 4:[34,13], 5:[27,13], 6:[20,10], 7:[7,4], 8:[33,2]};
+const START = [4,21], CHEST_POS = [[37,20],[6,5]];
+function hash(x,y){ let n = (x*374761393 + y*668265263)|0; n = Math.imul(n ^ (n>>>13), 1274126177); return ((n ^ (n>>>16))>>>0)/4294967295; }
+const reserved = new Set();
+for (const k in STN){ const [x,y] = STN[k]; reserved.add(`${x},${y}`); reserved.add(`${x},${y-1}`); }
+reserved.add(START.join(",")); CHEST_POS.forEach(p => reserved.add(p.join(",")));
+for (let y=1; y<MH-1; y++) for (let x=1; x<MW-1; x++){
+  if (map[y][x] !== "." || hash(x,y) > 0.075) continue;
+  let near = false;
+  for (let dy=-1; dy<=1; dy++) for (let dx=-1; dx<=1; dx++){ const c = map[y+dy][x+dx]; if (c === "_" || c === "=" || c === "H" || reserved.has(`${x+dx},${y+dy}`)) near = true; }
+  if (!near) setT(x,y,"#");
+}
+
+// ======================= ESTADO =======================
+const ents = [];
+const P = {x:START[0], y:START[1], tx:START[0], ty:START[1], prog:0, moving:false, dir:"down", hp:HP_MAX, potions:1, name:""};
+const ST = {correct:0, wrong:0, hints:0, t0:0, ms:0, fin:0, done:[false,false,false,false,false,false,false,false]};
+for (const k in STN){
+  const [x,y] = STN[k];
+  ents.push({t:"S", k:+k, x, y, talked:false});
+  if (+k !== 6) ents.push({t:"D", k:+k, x, y:y-1});
+}
+CHEST_POS.forEach(([x,y]) => ents.push({t:"C", x, y, open:false}));
+const ENT_ALL = ents.slice();
+const STATION = k => ENT_ALL.find(e => e.t === "S" && e.k === k);
+const CHESTS = ENT_ALL.filter(e => e.t === "C");
+const isDone = k => ST.done[k-1];
+
+// ======================= MISIONES =======================
+const QUESTS = [1,2,3,4,5,6,7,8].map(k => ({
+  t:`${k}. ${STN_INFO[k].short}`, k,
+  obj:`Misión ${k}: ve con ${STN_INFO[k].who} en ${STN_INFO[k].place}.`,
+  done:() => isDone(k), tgt:() => STATION(k),
+})).concat([{t:`Abre los ${CHESTS.length} cofres (opcional)`, opt:true,
+  done:() => CHESTS.every(c => c.open), prog:() => `${CHESTS.filter(c=>c.open).length}/${CHESTS.length}`, tgt:() => CHESTS.find(c => !c.open)}]);
+const MAIN = QUESTS.filter(q => !q.opt);
+const curQuest = () => MAIN.find(q => !q.done());
+const questsDone = () => MAIN.filter(q => q.done()).length;
+
+// ======================= GUARDADO (localStorage) =======================
+function save(){
+  if (state === "title" || !P.name) return;
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      v:1, done: state === "end", muted,
+      P:{x:P.x, y:P.y, dir:P.dir, hp:P.hp, potions:P.potions, name:P.name},
+      ST, ents: ENT_ALL.map(e => ({x:e.x, y:e.y, open:!!e.open, talked:!!e.talked})),
+    }));
+  } catch(e){}
+}
+function readSave(){
+  try {
+    const d = JSON.parse(localStorage.getItem(SAVE_KEY));
+    return d && d.v === 1 && d.P && d.P.name && Array.isArray(d.ents) && d.ents.length === ENT_ALL.length && d.ST && Array.isArray(d.ST.done) ? d : null;
+  } catch(e){ return null; }
+}
+function applySave(d){
+  Object.assign(P, d.P); Object.assign(ST, d.ST);
+  ENT_ALL.forEach((e,i) => { const s = d.ents[i]; e.x = s.x; e.y = s.y; e.open = s.open; e.talked = s.talked; });
+  P.tx = P.x; P.ty = P.y; P.prog = 0; P.moving = false;
+  if (solidTile(P.x, P.y) || entAt(P.x, P.y)){ P.x = P.tx = START[0]; P.y = P.ty = START[1]; }
+  if (!(P.hp > 0)) P.hp = HP_MAX;
+  muted = !!d.muted; $("mute").textContent = muted ? "🔇" : "🔊";
+}
+function resetGame(){
+  try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+  location.reload();
+}
+addEventListener("visibilitychange", () => { if (document.hidden) save(); });
+addEventListener("pagehide", save);
+const SOLID = new Set(["#","~","H"]);
+let state = "title", T = 0, dlg = null, B = null, cooldown = 0;
+let held = [], tap = null;
+
+// ======================= SONIDO =======================
+let AC = null, muted = false;
+function beep(f, d, type="square", v=0.05, delay=0){
+  if (muted) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t+d);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t+d+0.02);
+  } catch(e){}
+}
+const sfx = {
+  hit(){ beep(660,.1); beep(990,.18,"square",.05,.09); },
+  hurt(){ beep(180,.25,"sawtooth",.06); beep(110,.3,"sawtooth",.06,.12); },
+  enc(){ [392,494,587,784].forEach((f,i)=>beep(f,.1,"square",.04,i*.08)); },
+  chest(){ [523,659,784,1046].forEach((f,i)=>beep(f,.14,"triangle",.07,i*.1)); },
+  lvl(){ [523,659,784,659,784,1046].forEach((f,i)=>beep(f,.12,"square",.05,i*.09)); },
+  talk(){ beep(880,.04,"square",.03); },
+  win(){ [784,988,1175,1568].forEach((f,i)=>beep(f,.2,"triangle",.07,i*.15)); },
+};
+$("mute").onclick = () => { muted = !muted; $("mute").textContent = muted ? "🔇" : "🔊"; };
+
+// ======================= DIBUJO: MAPA =======================
+function R(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); }
+function ell(x,y,rx,ry,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.ellipse(x,y,Math.max(rx,0.1),Math.max(ry,0.1),0,0,Math.PI*2); ctx.fill(); }
+const cv = $("cv"), ctx = cv.getContext("2d");
+function grass(sx,sy,x,y){
+  const north = y < 9;
+  R(sx,sy,TILE,TILE, north ? "#5aa66a" : "#58b04f");
+  const h = hash(x,y);
+  if (h < 0.5){ R(sx+4+h*20, sy+8+h*14, 2, 4, north ? "#4a8f5a" : "#479a3f"); R(sx+18-h*8, sy+20, 2, 4, north ? "#4a8f5a" : "#479a3f"); }
+  if (h > 0.93){ R(sx+12, sy+12, 4, 4, north ? "#c9a7ff" : "#ffe066"); R(sx+13, sy+13, 2, 2, "#f39c12"); }
+}
+function drawTile(c,x,y,sx,sy){
+  const h = hash(x,y);
+  switch(c){
+    case ".": grass(sx,sy,x,y); break;
+    case "#":
+      if (x===0 || y===0 || x===MW-1 || y===MH-1 || true){
+        grass(sx,sy,x,y);
+        R(sx+13, sy+20, 6, 11, "#6b4423");
+        ell(sx+16, sy+14, 13, 12, "#21662b"); ell(sx+12, sy+10, 6, 5, "#2e8a3a");
+      }
+      break;
+    case "~":
+      R(sx,sy,TILE,TILE,"#2b6cc4"); ctx.fillStyle = "#5b9be6";
+      { const o = Math.sin(T/30 + x*0.9 + y*0.6)*4; ctx.fillRect(sx+6+o, sy+10, 8, 2); ctx.fillRect(sx+16-o, sy+22, 9, 2); }
+      break;
+    case "=":
+      R(sx,sy,TILE,TILE,"#2b6cc4"); R(sx+3, sy, 26, TILE, "#9c6b3a");
+      for (let i=0;i<4;i++) R(sx+3, sy+i*8+7, 26, 1, "#6e4a26");
+      R(sx+2, sy, 2, TILE, "#5a3a1c"); R(sx+28, sy, 2, TILE, "#5a3a1c");
+      break;
+    case "_":
+      R(sx,sy,TILE,TILE, y < 9 ? "#c9b38a" : "#d1b077");
+      if (h<0.5) R(sx+6+h*30, sy+10+h*20, 3, 2, "#b8955c");
+      break;
+    case "H": {
+      const top = map[y-1][x] !== "H";
+      if (top){
+        grass(sx,sy,x,y);
+        ctx.fillStyle = y < 9 ? "#5b6fb5" : "#b5402f"; ctx.fillRect(sx, sy+6, TILE, 26);
+        ctx.fillStyle = y < 9 ? "#46589a" : "#8e2f22"; for (let i=0;i<3;i++) ctx.fillRect(sx, sy+12+i*7, TILE, 2);
+      } else {
+        R(sx,sy,TILE,TILE,"#e9d8b4"); R(sx, sy, TILE, 2, "#c4b08a");
+        const door = map[y][x-1]==="H" && map[y][x+1]==="H";
+        if (door){ R(sx+9, sy+10, 14, 22, "#6b4423"); R(sx+19, sy+20, 2, 2, "#ffd447"); }
+        else { R(sx+8, sy+9, 16, 12, "#4a90d9"); R(sx+15, sy+9, 2, 12, "#c4b08a"); R(sx+8, sy+14, 16, 2, "#c4b08a"); }
+      }
+      break; }
+  }
+}
+function drawPerson(sx,sy,o){
+  ell(sx+16, sy+30, 9, 3, "rgba(0,0,0,.25)");
+  R(sx+8, sy+13, 16, 17, o.robe); R(sx+8, sy+27, 16, 3, "rgba(0,0,0,.2)");
+  R(sx+10, sy+4, 12, 10, o.skin || "#f2c49b");
+  R(sx+9, sy+2, 14, 4, o.hair || "#5a3418");
+  if (o.longHair){ R(sx+8, sy+4, 3, 12, o.hair); R(sx+21, sy+4, 3, 12, o.hair); }
+  R(sx+12, sy+8, 2, 2, "#222"); R(sx+18, sy+8, 2, 2, "#222");
+  if (o.beard){ R(sx+10, sy+11, 12, 6, o.beard); }
+  if (o.hard){ R(sx+8, sy+1, 16, 5, "#ffcc00"); R(sx+6, sy+5, 20, 2, "#e6b800"); }
+  if (o.glasses){ R(sx+11, sy+7, 4, 4, "rgba(255,255,255,.6)"); R(sx+17, sy+7, 4, 4, "rgba(255,255,255,.6)"); }
+  if (o.spear){ R(sx+26, sy-2, 2, 32, "#7a4a1f"); ctx.fillStyle="#dfe4ea"; ctx.beginPath(); ctx.moveTo(sx+24,sy-1); ctx.lineTo(sx+27,sy-9); ctx.lineTo(sx+30,sy-1); ctx.fill(); }
+  if (o.tool){ R(sx+24, sy+14, 3, 14, "#7a4a1f"); R(sx+22, sy+12, 8, 4, "#9aa3ad"); }
+}
+const NPC_LOOK = {
+  1:{robe:"#e67e22", hair:"#3a2410", longHair:true, hard:true},
+  2:{robe:"#2a6cb3", hair:"#1f1f1f", hard:true, tool:true},
+  3:{robe:"#6c3fb0", hair:"#c08a4a", longHair:true, glasses:true},
+  4:{robe:"#8b5a2b", hair:"#5a3418", beard:"#5a3418", tool:true},
+  5:{robe:"#7d8590", hair:"#2b2b2b", longHair:true, skin:"#c98e62"},
+  6:{robe:"#1f8a7a", hair:"#2b1a10", longHair:true, spear:true},
+  7:{robe:"#c0392b", hair:"#f0d58c", skin:"#e0b48a"},
+};
+function drawHero(sx,sy){
+  const d = P.dir, step = P.moving ? Math.floor(T/5)%2 : 0;
+  ell(sx+16, sy+30, 9, 3, "rgba(0,0,0,.25)");
+  R(sx+11, sy+22+step, 4, 7, "#3a2a1a"); R(sx+17, sy+23-step, 4, 7, "#3a2a1a");
+  R(sx+9, sy+14, 14, 10, "#2d9a6a"); R(sx+9, sy+20, 14, 2, "#7a4a1f");
+  R(sx+10, sy+5, 12, 10, "#f2c49b");
+  R(sx+8, sy+2, 16, 5, "#ffcc00"); R(sx+6, sy+6, 20, 2, "#e6b800");   // casco de constructor
+  if (d==="down"){ R(sx+12, sy+9, 2, 2, "#222"); R(sx+18, sy+9, 2, 2, "#222"); }
+  if (d==="left") R(sx+11, sy+9, 2, 2, "#222");
+  if (d==="right") R(sx+19, sy+9, 2, 2, "#222");
+  if (d==="up") R(sx+10, sy+7, 12, 6, "#5a3418");
+  if (d!=="left"){ R(sx+23, sy+12, 2, 12, "#9aa3ad"); R(sx+22, sy+12, 6, 3, "#9aa3ad"); }   // escuadra
+}
+function drawChest(sx,sy,open){
+  ell(sx+16, sy+28, 11, 3, "rgba(0,0,0,.25)");
+  R(sx+5, sy+12, 22, 16, "#8b5a2b"); R(sx+5, sy+18, 22, 2, "#ffd447");
+  if (open){ R(sx+5, sy+6, 22, 6, "#5a3a1c"); R(sx+7, sy+12, 18, 4, "#2a1a0a"); }
+  else { R(sx+5, sy+8, 22, 6, "#a0692f"); R(sx+14, sy+15, 4, 5, "#ffd447"); }
+}
+// Obras (dibujo de cada estación)
+function drawDeco(k, sx, sy){
+  const done = isDone(k);
+  ell(sx+16, sy+30, 15, 4, "rgba(0,0,0,.25)");
+  ctx.save();
+  if (!done) ctx.filter = "grayscale(.75) brightness(.85)";
+  if (k===1){ R(sx+3, sy+12, 26, 18, "#d9a35b"); ctx.fillStyle="#9c5a2a"; ctx.beginPath(); ctx.moveTo(sx+1,sy+13); ctx.lineTo(sx+16,sy+1); ctx.lineTo(sx+31,sy+13); ctx.fill(); R(sx+12, sy+18, 8, 12, "#6b4423"); }
+  if (k===2){ R(sx+7, sy+18, 2, 12, "#6b6b7a"); R(sx+23, sy+18, 2, 12, "#6b6b7a"); R(sx+6, sy+4, 20, 15, "#5b9be6"); ell(sx+16, sy+4, 10, 3, "#a9d0f5"); ell(sx+16, sy+19, 10, 3, "#3f7fc0"); }
+  if (k===3){ R(sx+4, sy+18, 24, 12, "#c9c3b5"); ctx.fillStyle="#f2f2f2"; ctx.beginPath(); ctx.arc(sx+16, sy+18, 11, Math.PI, 0); ctx.fill(); R(sx+15, sy+7, 9, 3, "#555"); }
+  if (k===4){ R(sx+3, sy+14, 26, 16, "#b07a45"); ctx.fillStyle="#7a4a1f"; ctx.beginPath(); ctx.moveTo(sx+1,sy+15); ctx.lineTo(sx+16,sy+3); ctx.lineTo(sx+31,sy+15); ctx.fill(); R(sx+6, sy+19, 8, 6, "#ffe9a3"); R(sx+18, sy+19, 8, 11, "#5a3418"); }
+  if (k===5){ R(sx+4, sy+10, 24, 20, "#9aa3ad"); R(sx+4, sy+10, 24, 4, "#c3c9d0"); ell(sx+16, sy+12, 6, 2, "#3a2a1a"); R(sx+4, sy+22, 24, 1, "#7d8590"); }
+  if (k===7){ R(sx+14, sy+10, 4, 20, "#7a4a1f"); R(sx+2, sy+3, 28, 13, "#f4e6c3"); ctx.strokeStyle="#7a4a1f"; ctx.lineWidth=2; ctx.strokeRect(sx+2, sy+3, 28, 13);
+    ctx.font = "bold 9px system-ui"; ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.fillText("2·5·8", sx+16, sy+13); }
+  if (k===8){ for (let i=0;i<4;i++) R(sx+2+i*7, sy+30-(i+1)*7, 30-i*7 > 0 ? 30-i*7 : 4, (i+1)*7, ["#d4a017","#c8961a","#b8860b","#a07408"][i]); }
+  ctx.restore();
+  if (done){ ctx.font = "12px serif"; ctx.textAlign="center"; ctx.fillText("✅", sx+27, sy+8); }
+}
+function drawGuardian(sx,sy){
+  const b = Math.sin(T/14)*1.5;
+  ell(sx+16, sy+30, 11, 3, "rgba(0,0,0,.3)");
+  R(sx+6, sy+12+b, 20, 18, "#d4a017"); R(sx+3, sy+13+b, 4, 12, "#b8860b"); R(sx+25, sy+13+b, 4, 12, "#b8860b");
+  R(sx+9, sy+1+b, 14, 12, "#e6c35c"); R(sx+11, sy+5+b, 3, 3, "#2a6cb3"); R(sx+18, sy+5+b, 3, 3, "#2a6cb3");
+}
+function drawMap(){
+  const px = (P.x + (P.tx-P.x)*P.prog)*TILE, py = (P.y + (P.ty-P.y)*P.prog)*TILE;
+  const camX = Math.max(0, Math.min(MW*TILE - VW*TILE, px - VW*TILE/2 + TILE/2));
+  const camY = Math.max(0, Math.min(MH*TILE - VH*TILE, py - VH*TILE/2 + TILE/2));
+  const x0 = Math.floor(camX/TILE), y0 = Math.floor(camY/TILE);
+  for (let y=y0; y<=y0+VH && y<MH; y++) for (let x=x0; x<=x0+VW && x<MW; x++)
+    drawTile(map[y][x], x, y, Math.round(x*TILE-camX), Math.round(y*TILE-camY));
+  const list = ents.map(e=>({y:e.y, f:()=>drawEnt(e, Math.round(e.x*TILE-camX), Math.round(e.y*TILE-camY))}));
+  list.push({y:py/TILE, f:()=>drawHero(Math.round(px-camX), Math.round(py-camY))});
+  list.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
+  const q = curQuest(), t = q && q.tgt();
+  if (t){
+    const k = hudScale(), tx = t.x*TILE - camX + 16, ty = t.y*TILE - camY + 16;
+    if (tx < 0 || tx > 640 || ty < 0 || ty > 480) edgePointer(tx, ty, 8 + 72*k + 10, k);
+  }
+}
+function arrowDown(x,y,k){
+  const w = 9*k, h = 12*k;
+  ctx.fillStyle = "#ffd447"; ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x-w, y-h); ctx.lineTo(x+w, y-h); ctx.lineTo(x, y); ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function edgePointer(tx,ty,top,k){
+  const cx = 320, cy = 240, dx = tx-cx, dy = ty-cy, m = 22*k;
+  const t = Math.min(dx > 0 ? (640-m-cx)/dx : dx < 0 ? (m-cx)/dx : Infinity,
+                     dy > 0 ? (480-m-cy)/dy : dy < 0 ? (Math.min(cy-10, top+m)-cy)/dy : Infinity);
+  const x = cx + dx*t, y = cy + dy*t, s = (14 + Math.sin(T/6)*2)*k;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(dy, dx));
+  ctx.fillStyle = "#ffd447"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(s, 0); ctx.lineTo(-s*0.7, -s*0.75); ctx.lineTo(-s*0.3, 0); ctx.lineTo(-s*0.7, s*0.75); ctx.closePath(); ctx.stroke(); ctx.fill();
+  ctx.restore();
+}
+function drawEnt(e,sx,sy){
+  const bob = Math.sin(T/15 + e.x)*1;
+  if (e.t==="S"){ if (e.k === 8) drawGuardian(sx,sy); else drawPerson(sx, sy+bob, NPC_LOOK[e.k]); }
+  if (e.t==="D") drawDeco(e.k, sx, sy);
+  if (e.t==="C") drawChest(sx,sy,e.open);
+  const k = hudScale(), q = curQuest(), by = Math.sin(T/8)*3;
+  if (e.t === "S" && q && q.tgt() === e) arrowDown(sx+16, sy - 6 + by, k);
+  else if (e.t==="C" && !e.open){
+    ctx.font = `${Math.round(12*k)}px 'Press Start 2P'`; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+    ctx.lineWidth = 3; ctx.strokeStyle = "#000"; ctx.strokeText("!", sx+16, sy-4+by);
+    ctx.fillStyle = "#ffd447"; ctx.fillText("!", sx+16, sy-4+by);
+  }
+  if (e.t==="S" && e.k !== 8 && isDone(e.k)){ ctx.font = `${Math.round(11*k)}px serif`; ctx.textAlign="center"; ctx.fillText("⭐", sx+16, sy-2); }
+}
+
+// ======================= DIBUJO: RIVALES =======================
+function eyes(x1,x2,y,r,pupil="#111"){ ell(x1,y,r,r,"#fff"); ell(x2,y,r,r,"#fff"); ell(x1+1,y+1,r*0.5,r*0.5,pupil); ell(x2+1,y+1,r*0.5,r*0.5,pupil); }
+function drawMonster(m,cx,cy,t,s=1){
+  ctx.save(); ctx.translate(cx,cy); ctx.scale(s,s);
+  if (m.kind==="cube"){
+    const b = Math.abs(Math.sin(t/10))*-14;
+    ell(0, 70, 60, 10, "rgba(0,0,0,.25)");
+    ctx.fillStyle = "#f6c56b"; ctx.beginPath(); ctx.moveTo(-45,-25+b); ctx.lineTo(-15,-50+b); ctx.lineTo(55,-50+b); ctx.lineTo(25,-25+b); ctx.fill();
+    ctx.fillStyle = "#b9782a"; ctx.beginPath(); ctx.moveTo(25,-25+b); ctx.lineTo(55,-50+b); ctx.lineTo(55,30+b); ctx.lineTo(25,55+b); ctx.fill();
+    R(-45, -25+b, 70, 80, m.color);
+    eyes(-25, 5, 5+b, 10); R(-22, 32+b, 24, 5, "#5a3418");
+  } else if (m.kind==="slime"){
+    const sq = Math.sin(t/8)*4;
+    ell(0, 60, 60, 10, "rgba(0,0,0,.25)");
+    ctx.fillStyle = m.color; ctx.beginPath();
+    ctx.moveTo(-60-sq, 58); ctx.quadraticCurveTo(-58, -30+sq, 0, -45+sq); ctx.quadraticCurveTo(58, -30+sq, 60+sq, 58); ctx.closePath(); ctx.fill();
+    ell(-22, -15+sq, 10, 6, "rgba(255,255,255,.45)");
+    eyes(-18, 18, 8+sq/2, 11); R(-10, 30+sq/2, 20, 4, "#222");
+  } else if (m.kind==="bat"){
+    const fl = Math.sin(t/4)*22, y = Math.sin(t/10)*10;
+    ell(0, 75, 40, 8, "rgba(0,0,0,.25)");
+    ctx.fillStyle = "#3a2a5e";
+    ctx.beginPath(); ctx.moveTo(-20,y); ctx.lineTo(-100,y-30-fl); ctx.lineTo(-80,y+10); ctx.lineTo(-60,y); ctx.lineTo(-40,y+20); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(20,y); ctx.lineTo(100,y-30-fl); ctx.lineTo(80,y+10); ctx.lineTo(60,y); ctx.lineTo(40,y+20); ctx.fill();
+    ell(0, y, 34, 32, m.color);
+    ctx.fillStyle = m.color; ctx.beginPath(); ctx.moveTo(-26,y-20); ctx.lineTo(-20,y-50); ctx.lineTo(-8,y-26); ctx.moveTo(26,y-20); ctx.lineTo(20,y-50); ctx.lineTo(8,y-26); ctx.fill();
+    eyes(-12, 12, y-4, 9, "#c0392b");
+    ctx.fillStyle = "#ffcc00"; ctx.beginPath(); ctx.moveTo(-5,y+8); ctx.lineTo(5,y+8); ctx.lineTo(0,y+16); ctx.fill();
+  } else if (m.kind==="ghost"){
+    const y = Math.sin(t/12)*10;
+    ell(0, 80, 40, 8, "rgba(0,0,0,.2)");
+    ctx.fillStyle = "rgba(220,235,255,.88)"; ctx.beginPath();
+    ctx.moveTo(-50, y+50); ctx.lineTo(-50, y-10); ctx.arc(0, y-10, 50, Math.PI, 0); ctx.lineTo(50, y+50);
+    for (let i=0;i<5;i++){ const xx = 50 - i*20; ctx.quadraticCurveTo(xx-5, y+65 + Math.sin(t/5+i)*6, xx-20, y+50); }
+    ctx.fill();
+    ell(-18, y-12, 9, 12, "#1b1a2e"); ell(18, y-12, 9, 12, "#1b1a2e"); ell(0, y+18, 12, 9, "#1b1a2e"); ell(0, y+18, 6, 4, "rgba(220,235,255,.88)");
+  } else if (m.kind==="golem"){
+    const b = Math.sin(t/14)*3, dark = m.boss ? "#a07408" : "#8a4a2a";
+    ell(0, 78, 70, 10, "rgba(0,0,0,.25)");
+    R(-62, -10+b, 26, 60, dark); R(36, -10+b, 26, 60, dark);
+    R(-40, -20+b, 80, 75, m.color); R(-30, 55, 22, 22, dark); R(8, 55, 22, 22, dark);
+    for (let i=0;i<3;i++) R(-40, -2+i*20+b, 80, 2, dark);
+    R(-28, -70+b, 56, 50, m.boss ? "#e6c35c" : "#c97a52");
+    R(-18, -55+b, 12, 8, "#4fa3ff"); R(6, -55+b, 12, 8, "#4fa3ff");
+    if (m.boss){ ctx.fillStyle = "#fff6d6"; ctx.font = "bold 26px serif"; ctx.textAlign = "center"; ctx.fillText("Σ", 0, 30+b); }
+  }
+  ctx.restore();
+}
+
+// ======================= DIBUJO: FIGURAS 3D Y SECUENCIAS =======================
+const cssScale = () => (cv.clientWidth || 640) / 640;
+const hudScale = () => Math.min(1.6, Math.max(1, 0.75 / cssScale()));
+const figScale = () => Math.min(1.8, Math.max(1, 13 / (17 * cssScale())));
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x,y,w,h,r) : ctx.rect(x,y,w,h); }
+const DZX = 0.42, DZY = 0.30, ELL = 0.30;      // proyección oblicua: la profundidad va arriba a la derecha
+const PAL = {
+  stone:{front:"#e8c66f", top:"#f6e3a6", side:"#c79a43", line:"#4a3416"},
+  water:{front:"#7fb8e6", top:"#c4e2fa", side:"#4f8fc4", line:"#1d3d5e"},
+  rock:{front:"#b8bec6", top:"#dfe3e8", side:"#8d949c", line:"#33383d"},
+  dome:{front:"#e9e4f5", top:"#ffffff", side:"#b9b0d6", line:"#3b3366"},
+};
+function makeView(pts, box, k){
+  const [bx,by,bw,bh] = box, pad = 18 + 34*k;
+  const pr = pts.map(([x,y,z=0]) => [x + z*DZX, y + z*DZY]);
+  const xs = pr.map(p=>p[0]), ys = pr.map(p=>p[1]);
+  const minx=Math.min(...xs), maxx=Math.max(...xs), miny=Math.min(...ys), maxy=Math.max(...ys);
+  const sc = Math.min((bw-2*pad)/Math.max(maxx-minx,.001), (bh-2*pad)/Math.max(maxy-miny,.001));
+  const ox = bx + bw/2 - (minx+maxx)/2*sc, oy = by + bh/2 + (miny+maxy)/2*sc;
+  const P2 = (x,y,z=0) => [ox + (x + z*DZX)*sc, oy - (y + z*DZY)*sc];
+  const G = [bx + bw/2, by + bh/2];
+  return {sc, P:P2, G};
+}
+function poly2(pts, fill, stroke, lw=2, dash){
+  ctx.beginPath(); pts.forEach((p,i) => i ? ctx.lineTo(p[0],p[1]) : ctx.moveTo(p[0],p[1])); ctx.closePath();
+  if (fill){ ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]); }
+}
+function line2(a, b, c, lw=2, dash){ ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]); }
+// Prisma general: cara frontal "poly" (x,y) en z = 0, extruida hasta z = D
+function extrude(V, poly, D, c, smooth){
+  const n = poly.length; let A = 0;
+  for (let i=0;i<n;i++){ const [x1,y1] = poly[i], [x2,y2] = poly[(i+1)%n]; A += x1*y2 - x2*y1; }
+  const s = A > 0 ? 1 : -1, vis = [];
+  for (let i=0;i<n;i++){
+    const [x1,y1] = poly[i], [x2,y2] = poly[(i+1)%n], nx = (y2-y1)*s, ny = -(x2-x1)*s, L = Math.hypot(nx,ny) || 1;
+    vis[i] = (nx*DZX + ny*DZY)/L > 1e-6;
+    if (vis[i]){
+      const col = ny/L > 0.55 ? c.top : (nx/L > 0.3 ? c.side : c.top);
+      const q = [V.P(x1,y1,0), V.P(x2,y2,0), V.P(x2,y2,D), V.P(x1,y1,D)];
+      poly2(q, col, col, 1);
+    }
+  }
+  for (let i=0;i<n;i++) if (vis[i]){ const [x1,y1] = poly[i], [x2,y2] = poly[(i+1)%n]; line2(V.P(x1,y1,D), V.P(x2,y2,D), c.line, 2.5); }
+  for (let i=0;i<n;i++){
+    const prev = (i-1+n)%n, [x,y] = poly[i];
+    if (vis[prev] !== vis[i] || (!smooth && vis[prev] && vis[i])) line2(V.P(x,y,0), V.P(x,y,D), c.line, 2.5);
+  }
+  poly2(poly.map(([x,y]) => V.P(x,y,0)), c.front, c.line, 3);
+}
+// Cilindro vertical con elipses (dibujo de libro de texto)
+function vcyl(V, cx, y0, h, r, c, opts={}){
+  const [x, yb] = V.P(cx, y0), yt = V.P(cx, y0+h)[1], rx = r*V.sc, ry = rx*ELL;
+  const g = ctx.createLinearGradient(x-rx, 0, x+rx, 0); g.addColorStop(0, c.side); g.addColorStop(0.45, c.front); g.addColorStop(1, c.side);
+  ctx.beginPath(); ctx.moveTo(x-rx, yt); ctx.lineTo(x-rx, yb); ctx.ellipse(x, yb, rx, ry, 0, Math.PI, 0, true); ctx.lineTo(x+rx, yt); ctx.ellipse(x, yt, rx, ry, 0, 0, Math.PI, true); ctx.closePath();
+  ctx.fillStyle = g; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x, yb, rx, ry, 0, Math.PI, 2*Math.PI); ctx.strokeStyle = c.line; ctx.lineWidth = 1.5; ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(x-rx, yt); ctx.lineTo(x-rx, yb); ctx.ellipse(x, yb, rx, ry, 0, Math.PI, 0, true); ctx.lineTo(x+rx, yt); ctx.lineWidth = 3; ctx.stroke();
+  if (!opts.noTop){ ctx.beginPath(); ctx.ellipse(x, yt, rx, ry, 0, 0, 2*Math.PI); ctx.fillStyle = c.top; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = c.line; ctx.stroke(); }
+  return {x, yb, yt, rx, ry};
+}
+function dome(x, y, rx, c, base=true){
+  const ry = rx*ELL, g = ctx.createRadialGradient(x - rx*0.35, y - rx*0.55, rx*0.1, x, y - rx*0.3, rx*1.1);
+  g.addColorStop(0, c.top); g.addColorStop(1, c.side);
+  ctx.beginPath(); ctx.arc(x, y, rx, Math.PI, 2*Math.PI); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = c.line; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, rx, Math.PI, 2*Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI); ctx.stroke();
+  if (base){ ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, Math.PI, 2*Math.PI); ctx.lineWidth = 1.5; ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]); }
+}
+// --- Etiquetas que no se enciman (portado de La Leyenda del Coseno) ---
+function edgeLab(V, a, b, text, kind="dim"){
+  const p = V.P(...a), q = V.P(...b), mx = (p[0]+q[0])/2, my = (p[1]+q[1])/2;
+  let nx = -(q[1]-p[1]), ny = q[0]-p[0]; const n = Math.hypot(nx,ny) || 1; nx /= n; ny /= n;
+  if ((mx-V.G[0])*nx + (my-V.G[1])*ny < 0){ nx = -nx; ny = -ny; }
+  return {text, ax:mx, ay:my, dx:nx, dy:ny, kind};
+}
+const ptLab = (x, y, dx, dy, text, kind="dim") => ({text, ax:x, ay:y, dx, dy, kind});
+function drawLabels(labs, box, k){
+  const F_ = Math.round(16*k), H = F_ + 8, [bx,by,bw,bh] = box;
+  ctx.font = `bold ${F_}px system-ui, sans-serif`;
+  for (const L of labs){ L.w = ctx.measureText(L.text).width + 12; L.h = H; L.d0 = 5*k + Math.abs(L.dx)*L.w/2 + Math.abs(L.dy)*H/2; L.x = L.ax + L.dx*L.d0; L.y = L.ay + L.dy*L.d0; }
+  const X0 = bx+4, X1 = bx+bw-4, Y0 = by+2, Y1 = by+bh-2;
+  for (let it = 0; it < 80; it++){
+    let moved = false;
+    for (let i = 0; i < labs.length; i++) for (let j = i+1; j < labs.length; j++){
+      const A = labs[i], Bq = labs[j];
+      const ovx = (A.w+Bq.w)/2 + 4 - Math.abs(A.x-Bq.x), ovy = (A.h+Bq.h)/2 + 3 - Math.abs(A.y-Bq.y);
+      if (ovx <= 0 || ovy <= 0) continue;
+      moved = true;
+      if (ovx < ovy){ const s = (A.x < Bq.x ? -1 : 1) * (ovx/2 + 0.5); A.x += s; Bq.x -= s; }
+      else { const s = (A.y < Bq.y ? -1 : 1) * (ovy/2 + 0.5); A.y += s; Bq.y -= s; }
+    }
+    for (const L of labs){
+      const t = (L.x-L.ax)*L.dx + (L.y-L.ay)*L.dy;
+      if (t < L.d0){ L.x += L.dx*(L.d0-t); L.y += L.dy*(L.d0-t); }
+      L.x = Math.min(X1 - L.w/2, Math.max(X0 + L.w/2, L.x));
+      L.y = Math.min(Y1 - L.h/2, Math.max(Y0 + L.h/2, L.y));
+    }
+    if (!moved) break;
+  }
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (const L of labs) if (Math.hypot(L.x-L.ax, L.y-L.ay) > L.d0 + 14*k){
+    ctx.strokeStyle = "rgba(58,42,26,.55)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(L.ax, L.ay); ctx.lineTo(L.x, L.y); ctx.stroke();
+  }
+  for (const L of labs){
+    const st = {ask:["#d62839","#fff"], warn:["#ff9f1c","#2a1a00"], dim:["rgba(255,255,255,.94)","#1b3a6b"]}[L.kind] || ["rgba(255,255,255,.94)","#1b3a6b"];
+    ctx.fillStyle = st[0]; rrect(L.x-L.w/2, L.y-L.h/2, L.w, L.h, 5); ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = st[1]; ctx.fillText(L.text, L.x, L.y+1);
+  }
+  ctx.textBaseline = "alphabetic";
+}
+// --- Figuras ---
+const FIG = {
+  ext(f, box, k){
+    const pts = []; f.poly.forEach(([x,y]) => { pts.push([x,y,0]); pts.push([x,y,f.D]); });
+    const V = makeView(pts, box, k), c = f.pal || PAL.stone;
+    extrude(V, f.poly, f.D, c, f.smooth);
+    const xs = f.poly.map(p=>p[0]), ys = f.poly.map(p=>p[1]), minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
+    const labs = [];
+    // índice del vértice frontal inferior derecho (para la profundidad)
+    let ri = 0; f.poly.forEach(([x,y],i) => { if (x > f.poly[ri][0] + 1e-9 || (Math.abs(x - f.poly[ri][0]) < 1e-9 && y < f.poly[ri][1])) ri = i; });
+    for (const L of (f.labs || [])){
+      if (L.e === "b") labs.push(edgeLab(V, [minx,miny,0], [maxx,miny,0], L.t, L.k));
+      if (L.e === "l"){ const yl = f.poly.filter(p => Math.abs(p[0]-minx) < 1e-9).map(p => p[1]); labs.push(edgeLab(V, [minx,Math.min(...yl),0], [minx,Math.max(...yl),0], L.t, L.k)); }
+      if (L.e === "d"){ const [x,y] = f.poly[ri]; labs.push(edgeLab(V, [x,y,0], [x,y,f.D], L.t, L.k)); }
+      if (L.e === "e"){ const [x1,y1] = f.poly[L.i], [x2,y2] = f.poly[(L.i+1)%f.poly.length]; labs.push(edgeLab(V, [x1,y1,0], [x2,y2,0], L.t, L.k)); }
+      if (L.e === "hgt"){ // altura del triángulo frontal
+        const apex = f.poly.reduce((a,p) => p[1] > a[1] ? p : a), a = V.P(apex[0], apex[1], 0), b = V.P(apex[0], miny, 0);
+        line2(a, b, "#d62839", 2, [6,4]); R(b[0], b[1]-8, 8, 8, "rgba(0,0,0,0)"); ctx.strokeStyle = "#d62839"; ctx.lineWidth = 1.5; ctx.strokeRect(b[0], b[1]-9, 9, 9);
+        labs.push(ptLab((a[0]+b[0])/2, (a[1]+b[1])/2, 1, 0, L.t, L.k));
+      }
+      if (L.e === "slope"){ const r = f.roof; labs.push(edgeLab(V, [r.x, r.y1, 0], [maxx, r.y0, 0], L.t, L.k)); }
+    }
+    if (f.roof){
+      const r = f.roof, a = V.P(r.x, r.y1, 0), b = V.P(r.x, r.y0, 0), ask = r.t.includes("?");
+      line2(a, b, ask ? "#d62839" : "#7a4a1f", 2, [6,4]); line2(V.P(minx, r.y0, 0), V.P(maxx, r.y0, 0), "rgba(74,52,22,.5)", 1.5, [4,4]);
+      labs.push(ptLab((a[0]+b[0])/2, (a[1]+b[1])/2, 1, 0.15, r.t, ask ? "ask" : "dim"));
+    }
+    if (f.rad){ const a = V.P(f.rad.c[0], f.rad.c[1], 0), b = V.P(f.rad.c[0] + f.rad.r, f.rad.c[1], 0); ell(a[0], a[1], 3.5, 3.5, "#3a2a1a"); line2(a, b, "#d62839", 2.5); labs.push(ptLab((a[0]+b[0])/2, a[1], 0, 1, f.rad.t)); }
+    return labs;
+  },
+  cyl(f, box, k){
+    const V = makeView([[-f.r, -f.r*ELL*1.2], [f.r, f.h + f.r*ELL*1.2]], box, k);
+    const c = vcyl(V, 0, 0, f.h, f.r, PAL.water), labs = [];
+    if (f.diam){ line2([c.x - c.rx, c.yt], [c.x + c.rx, c.yt], "#d62839", 2.5); labs.push(ptLab(c.x, c.yt - c.ry, 0, -1, f.rl)); }
+    else { ell(c.x, c.yt, 3.5, 3.5, "#1d3d5e"); line2([c.x, c.yt], [c.x + c.rx, c.yt], "#d62839", 2.5); labs.push(ptLab(c.x + c.rx/2, c.yt - c.ry, 0, -1, f.rl)); }
+    labs.push(ptLab(c.x + c.rx, (c.yt + c.yb)/2, 1, 0, f.hl));
+    return labs;
+  },
+  sph(f, box, k){
+    const V = makeView(f.half ? [[-f.r, -f.r*ELL*1.2], [f.r, f.r]] : [[-f.r, -f.r], [f.r, f.r]], box, k);
+    const [x, y] = V.P(0, 0), rx = f.r*V.sc, c = PAL.dome, labs = [];
+    if (f.half) dome(x, y, rx, c);
+    else {
+      const g = ctx.createRadialGradient(x - rx*0.35, y - rx*0.35, rx*0.1, x, y, rx*1.05); g.addColorStop(0, c.top); g.addColorStop(1, c.side);
+      ell(x, y, rx, rx, g); ctx.strokeStyle = c.line; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, rx, 0, 2*Math.PI); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(x, y, rx, rx*ELL, 0, Math.PI, 2*Math.PI); ctx.lineWidth = 1.5; ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.ellipse(x, y, rx, rx*ELL, 0, 0, Math.PI); ctx.lineWidth = 2; ctx.stroke();
+    }
+    ell(x, y, 3.5, 3.5, c.line); line2([x, y], [x + rx, y], "#d62839", 2.5);
+    labs.push(ptLab(x + rx/2, y, 0, -1, f.rl));
+    return labs;
+  },
+  silo(f, box, k){
+    const V = makeView([[-f.r, -f.r*ELL*1.2], [f.r, f.h + f.r]], box, k);
+    const c = vcyl(V, 0, 0, f.h, f.r, PAL.stone, {noTop:true}); dome(c.x, c.yt, c.rx, PAL.dome, false);
+    ctx.beginPath(); ctx.ellipse(c.x, c.yt, c.rx, c.ry, 0, Math.PI, 2*Math.PI); ctx.strokeStyle = PAL.dome.line; ctx.lineWidth = 1.5; ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
+    ell(c.x, c.yt, 3.5, 3.5, "#3a2a1a"); line2([c.x, c.yt], [c.x - c.rx, c.yt], "#d62839", 2.5);
+    return [ptLab(c.x - c.rx/2, c.yt + c.ry, 0, 1, f.rl), ptLab(c.x + c.rx, (c.yt + c.yb)/2, 1, 0, f.hl)];
+  },
+  tube(f, box, k){
+    const V = makeView([[-f.R, -f.R*ELL*1.2], [f.R, f.h + f.R*ELL*1.2]], box, k);
+    const c = vcyl(V, 0, 0, f.h, f.R, PAL.rock), ri = f.r*V.sc;
+    ctx.beginPath(); ctx.ellipse(c.x, c.yt, ri, ri*ELL, 0, 0, 2*Math.PI); ctx.fillStyle = "#3a2f28"; ctx.fill(); ctx.strokeStyle = PAL.rock.line; ctx.lineWidth = 2.5; ctx.stroke();
+    ell(c.x, c.yt, 3, 3, "#ffd447");
+    line2([c.x, c.yt], [c.x + c.rx, c.yt], "#d62839", 2.5); line2([c.x, c.yt], [c.x - ri, c.yt], "#ff9f1c", 2.5);
+    return [ptLab(c.x + c.rx*0.6, c.yt - c.ry, 0.4, -1, f.Rl), ptLab(c.x - ri/2, c.yt + c.ry, -0.4, 1, f.rl, "warn"), ptLab(c.x + c.rx, (c.yt + c.yb)/2, 1, 0, f.hl)];
+  },
+  hole(f, box, k){
+    const [dL, dA, dH] = clampDims([f.L, f.A, f.H]), dr = f.r * dL / f.L;
+    const pts = [[0,0,0],[dL,0,0],[0,dH,0],[dL,dH,dA],[0,dH,dA],[dL,0,dA]];
+    const V = makeView(pts, box, k);
+    extrude(V, [[0,0],[dL,0],[dL,dH],[0,dH]], dA, PAL.rock);
+    const [cx, cy] = V.P(dL/2, dH, dA/2), [, cyb] = V.P(dL/2, 0, dA/2), rx = dr*V.sc, ry = rx*ELL;
+    line2([cx-rx, cy], [cx-rx, cyb], "rgba(51,56,61,.7)", 1.5, [6,5]); line2([cx+rx, cy], [cx+rx, cyb], "rgba(51,56,61,.7)", 1.5, [6,5]);
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 2*Math.PI); ctx.fillStyle = "#3a2f28"; ctx.fill(); ctx.strokeStyle = PAL.rock.line; ctx.lineWidth = 2.5; ctx.stroke();
+    ell(cx, cy, 3, 3, "#ffd447"); line2([cx, cy], [cx + rx, cy], "#d62839", 2.5);
+    return [edgeLab(V, [0,0,0], [dL,0,0], f.ll), edgeLab(V, [0,0,0], [0,dH,0], f.hl), edgeLab(V, [dL,0,0], [dL,0,dA], f.al), ptLab(cx + rx/2, cy - ry, 0, -1, f.rl, "warn")];
+  },
+  pyr(f, box, k){
+    const {L, D, H} = f, pts = [[0,0,0],[L,0,0],[L,0,D],[0,0,D],[L/2,H,D/2]];
+    const V = makeView(pts, box, k), c = PAL.stone, A = V.P(L/2, H, D/2);
+    const b0 = V.P(0,0,0), b1 = V.P(L,0,0), b2 = V.P(L,0,D), b3 = V.P(0,0,D), cen = V.P(L/2, 0, D/2);
+    line2(b3, b0, c.line, 1.5, [6,5]); line2(b3, b2, c.line, 1.5, [6,5]); line2(b3, A, c.line, 1.5, [6,5]);
+    poly2([b1, b2, A], c.side, c.line, 3); poly2([b0, b1, A], c.front, c.line, 3);
+    line2(A, cen, "#d62839", 2, [6,4]); ell(cen[0], cen[1], 3, 3, "#d62839");
+    return [edgeLab(V, [0,0,0], [L,0,0], f.ll), edgeLab(V, [L,0,0], [L,0,D], f.al), ptLab((A[0]+cen[0])/2, (A[1]+cen[1])/2, -1, 0, f.hl)];
+  },
+  seq(f, box, k){
+    const [bx,by,bw,bh] = box, items = f.items, n = items.length;
+    const unit = items.map(it => it.gap ? 0.55 : 1), tot = unit.reduce((a,b)=>a+b, 0);
+    const s = Math.min((bw - 24) / (tot + (n-1)*0.15), bh*0.42), gap = s*0.15;
+    let x = bx + (bw - (tot*s + (n-1)*gap))/2;
+    const y = by + bh/2 - s/2 + (f.title ? s*0.18 : 0);
+    if (f.title){ ctx.font = `bold ${Math.round(Math.min(18*k, bw/(f.title.length*0.62)))}px system-ui, sans-serif`; ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.fillText(f.title, bx + bw/2, by + Math.max(20*k, y - by - s*0.55)); }
+    items.forEach((it, i) => {
+      const w = unit[i]*s;
+      if (it.gap){ ctx.fillStyle = "#3a2a10"; ctx.font = `bold ${Math.round(s*0.4)}px system-ui`; ctx.textAlign = "center"; ctx.fillText("…", x + w/2, y + s*0.62); x += w + gap; return; }
+      ctx.fillStyle = it.ask ? "#ffe3e6" : "#fff"; ctx.strokeStyle = it.ask ? "#d62839" : "#8a6a3a"; ctx.lineWidth = 3; rrect(x, y, w, s, 8); ctx.fill(); ctx.stroke();
+      const fs = Math.round(Math.min(s*0.42, (w-8) / Math.max(1, it.v.length*0.6)));
+      ctx.font = `bold ${fs}px system-ui, sans-serif`; ctx.fillStyle = it.ask && it.v === "?" ? "#d62839" : "#1b3a6b"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(it.v, x + w/2, y + s/2 + 1); ctx.textBaseline = "alphabetic";
+      if (it.lab) subText(it.lab[0], it.lab[1], x + w/2, y + s + Math.round(Math.max(s*0.36, 20*k)), Math.round(Math.max(15*k, Math.min(s*0.36, 22*k))), it.ask ? "#d62839" : "#5a4a2a");
+      if (it.note){ ctx.font = `bold ${Math.round(Math.max(14*k, Math.min(s*0.32, 20*k)))}px system-ui`; ctx.fillStyle = "#d62839"; ctx.textAlign = "center"; ctx.fillText(it.note, x + w/2, y - Math.round(10*k)); }
+      x += w + gap;
+    });
+    return [];
+  },
+  vseq(f, box, k){
+    const [bx,by,bw,bh] = box, n = f.shapes.length, s = Math.min((bw - 20)/(n + (n-1)*0.12), bh*0.6), gap = s*0.12;
+    let x = bx + (bw - (n*s + (n-1)*gap))/2; const y = by + bh/2 - s/2;
+    f.shapes.forEach((sh, i) => {
+      ctx.fillStyle = sh ? "#fff" : "#ffe3e6"; ctx.strokeStyle = sh ? "#8a6a3a" : "#d62839"; ctx.lineWidth = 3; rrect(x, y, s, s, 8); ctx.fill(); ctx.stroke();
+      if (sh) drawShape(sh, x + s/2, y + s/2, s/100);
+      else { ctx.font = `bold ${Math.round(s*0.5)}px system-ui`; ctx.fillStyle = "#d62839"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("?", x + s/2, y + s/2 + 2); ctx.textBaseline = "alphabetic"; }
+      subText(String(i+1), "", x + s/2, y + s + Math.round(Math.max(s*0.3, 18*k)), Math.round(Math.max(14*k, Math.min(s*0.3, 20*k))), "#5a4a2a");
+      x += s + gap;
+    });
+    return [];
+  },
+  sig(f, box, k){
+    const [bx,by,bw,bh] = box, cx = bx + bw/2, cy = by + bh/2, S = Math.min(bh*0.5, 120*k);
+    ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `${Math.round(S)}px "Times New Roman", serif`; const ex = `(${f.expr})`;
+    ctx.save(); ctx.font = `bold ${Math.round(S*0.36)}px system-ui, sans-serif`; const w2 = ctx.measureText(ex).width; ctx.restore();
+    const sx = cx - (S*0.6 + w2)/2 + S*0.3;
+    ctx.fillText("Σ", sx, cy);
+    ctx.font = `bold ${Math.round(S*0.28)}px system-ui, sans-serif`; ctx.fillText(String(f.n), sx, cy - S*0.62); ctx.fillText("i = 1", sx, cy + S*0.64);
+    ctx.font = `bold ${Math.round(S*0.36)}px system-ui, sans-serif`; ctx.textAlign = "left"; ctx.fillStyle = "#1b3a6b"; ctx.fillText(ex, sx + S*0.42, cy + 2);
+    ctx.textBaseline = "alphabetic";
+    return [];
+  },
+};
+function subText(b, s, x, y, fs, col){
+  ctx.fillStyle = col; ctx.textAlign = "left"; ctx.font = `bold ${fs}px "Times New Roman", serif`;
+  const wb = ctx.measureText(b).width; ctx.font = `bold ${Math.round(fs*0.68)}px "Times New Roman", serif`; const ws = s ? ctx.measureText(s).width : 0;
+  const x0 = x - (wb + ws)/2;
+  ctx.font = `italic bold ${fs}px "Times New Roman", serif`; ctx.fillText(b, x0, y);
+  if (s){ ctx.font = `bold ${Math.round(fs*0.68)}px "Times New Roman", serif`; ctx.fillText(s, x0 + wb + 1, y + fs*0.28); }
+}
+// Figuras de las secuencias lógicas (mismo dibujo en el lienzo y en los botones SVG)
+function shapeGeo(s){
+  if (s.dots){
+    const n = s.dots, cols = n <= 4 ? n : Math.ceil(Math.sqrt(n)), rows = Math.ceil(n/cols), r = n > 6 ? 9 : 11, sp = n > 6 ? 24 : 28, out = [];
+    for (let i=0;i<n;i++){ const row = Math.floor(i/cols), cIn = Math.min(cols, n - row*cols), col = i - row*cols; out.push([(col - (cIn-1)/2)*sp, (row - (rows-1)/2)*sp, r]); }
+    return {circles:out};
+  }
+  const rot = (s.rot || 0)*Math.PI/180, R_ = 38;
+  const tr = pts => pts.map(([x,y]) => [x*Math.cos(rot) - y*Math.sin(rot), x*Math.sin(rot) + y*Math.cos(rot)]);
+  if (s.arrow) return {poly: tr([[0,-40],[26,-6],[10,-6],[10,38],[-10,38],[-10,-6],[-26,-6]])};
+  const pts = []; for (let i=0;i<s.n;i++){ const a = -Math.PI/2 + 2*Math.PI*i/s.n; pts.push([R_*Math.cos(a), R_*Math.sin(a)]); }
+  return {poly: tr(pts)};
+}
+function drawShape(s, cx, cy, k){
+  const g = shapeGeo(s); ctx.fillStyle = s.fill; ctx.strokeStyle = "#222"; ctx.lineWidth = 2.5;
+  if (g.poly){ ctx.beginPath(); g.poly.forEach(([x,y],i) => i ? ctx.lineTo(cx+x*k, cy+y*k) : ctx.moveTo(cx+x*k, cy+y*k)); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  if (g.circles) for (const [x,y,r] of g.circles){ ctx.beginPath(); ctx.arc(cx+x*k, cy+y*k, r*k, 0, 2*Math.PI); ctx.fill(); ctx.stroke(); }
+}
+function svgShape(s){
+  const g = shapeGeo(s);
+  let inner = g.poly ? `<polygon points="${g.poly.map(p => p.map(v => v.toFixed(1)).join(",")).join(" ")}" fill="${s.fill}" stroke="#222" stroke-width="2.5"/>` : "";
+  if (g.circles) inner = g.circles.map(([x,y,r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${s.fill}" stroke="#222" stroke-width="2.5"/>`).join("");
+  return `<svg viewBox="-50 -50 100 100" aria-hidden="true">${inner}</svg>`;
+}
+function drawFig(p, box, k){
+  const [bx,by,bw,bh] = box, f = p.fig;
+  ctx.fillStyle = "#f4e6c3"; ctx.strokeStyle = "#8a6a3a"; ctx.lineWidth = 4; rrect(bx,by,bw,bh,10); ctx.fill(); ctx.stroke();
+  const fs = Math.round(9*k), foot = fs + 14, vol = !["seq","vseq","sig"].includes(f.t);
+  if (vol){ ctx.font = `${fs}px 'Press Start 2P'`; ctx.fillStyle = "#8a6a3a"; ctx.textAlign = "left"; ctx.fillText("Diagrama aproximado", bx+10, by+bh-10); }
+  const inner = [bx+4, by+4, bw-8, bh-8-(vol ? foot : 0)];
+  ctx.save(); const labs = FIG[f.t](f, inner, k) || []; ctx.restore();
+  drawLabels(labs, inner, k);
+  if (vol){ // etiqueta de lo que se busca
+    const F_ = Math.round(15*k); ctx.font = `bold ${F_}px system-ui, sans-serif`; const t = "V = ?", w = ctx.measureText(t).width + 14;
+    ctx.fillStyle = "#d62839"; rrect(bx + bw - w - 10, by + 10, w, F_ + 10, 6); ctx.fill(); ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(t, bx + bw - w/2 - 10, by + 10 + (F_+10)/2 + 1); ctx.textBaseline = "alphabetic";
+  }
+}
+
+// ======================= DIBUJO: RETO Y HUD =======================
+function battleLayout(){
+  const k = figScale();
+  if (cssScale() >= 0.85) return {k, mx:150, my:240, ms:0.9, box:[16,384,280,76], tri:[310,66,316,394], compact:false};
+  const top = Math.round(8 + 72*hudScale() + 6);
+  return {k, mx:98, my:Math.round((top+330)/2)+10, ms:0.55, box:[8,330,182,140], tri:[196,top,438,474-top], compact:true};
+}
+function drawBattle(){
+  const L = B.lay = battleLayout(), patt = B.k >= 6;
+  const bg = patt ? ["#2b2350","#3d3270","#2a2350"] : ["#8fd3ff","#c9b38a","#a8925f"];
+  const g = ctx.createLinearGradient(0,0,0,480); g.addColorStop(0,bg[0]); g.addColorStop(0.55,bg[0]); g.addColorStop(0.551,bg[1]); g.addColorStop(1,bg[2]);
+  ctx.fillStyle = g; ctx.fillRect(0,0,640,480);
+  if (!patt){ ell(90,90,40,14,"rgba(255,255,255,.8)"); ell(250,60,50,16,"rgba(255,255,255,.7)"); for (let i=0;i<4;i++) R(20+i*70, 200, 40, 64, "rgba(120,90,50,.25)"); }
+  else for (let i=0;i<30;i++){ const h = hash(i, 7); R(h*640, hash(i,3)*250, 2, 2, "rgba(255,255,255,.7)"); }
+  ell(L.mx, L.my + 80*L.ms, 130*L.ms, 26*L.ms, "rgba(0,0,0,.18)");
+  if (B.hp > 0 || B.flash > 0){
+    ctx.save(); if (B.flash > 0 && Math.floor(B.flash/3)%2===0) ctx.globalAlpha = 0.25;
+    drawMonster(B.m, L.mx, L.my, T, L.ms); ctx.restore();
+  }
+  const [qx,qy,qw,qh] = L.box;
+  ctx.fillStyle = "rgba(15,14,23,.8)"; ctx.fillRect(qx, qy, qw, qh);
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 3; ctx.strokeRect(qx, qy, qw, qh);
+  ctx.fillStyle = "#fff"; ctx.textAlign = "left";
+  if (L.compact){
+    ctx.font = "bold 21px system-ui, sans-serif";
+    const words = B.m.name.split(" "), l1 = words.slice(0, Math.ceil(words.length/2)).join(" "), l2 = words.slice(Math.ceil(words.length/2)).join(" ");
+    ctx.fillText(l1, qx+10, qy+30); if (l2) ctx.fillText(l2, qx+10, qy+56);
+    for (let i=0;i<B.m.hits;i++){ ctx.font = "30px serif"; ctx.fillStyle = i < B.hp ? "#ff5d6c" : "#555"; ctx.fillText("♥", qx+10 + i*36, qy+110); }
+  } else {
+    ctx.font = "11px 'Press Start 2P'"; ctx.fillText(B.m.name, qx+12, qy+26);
+    for (let i=0;i<B.m.hits;i++){ ctx.font = "20px serif"; ctx.fillStyle = i < B.hp ? "#ff5d6c" : "#555"; ctx.fillText("♥", qx+12 + i*26, qy+60); }
+  }
+  drawFig(B.prob, L.tri, L.k);
+  B.fx = B.fx.filter(f => f.t > 0);
+  for (const f of B.fx){ f.t--; f.y -= 0.8; ctx.globalAlpha = Math.min(1, f.t/20);
+    ctx.font = "16px 'Press Start 2P'"; ctx.textAlign = "center"; ctx.fillStyle = "#000"; ctx.fillText(f.text, L.mx+2, f.y+2); ctx.fillStyle = f.c; ctx.fillText(f.text, L.mx, f.y); ctx.globalAlpha = 1; }
+  if (B.flash > 0) B.flash--;
+  if (B.intro > 0){ ctx.fillStyle = `rgba(255,255,255,${B.intro/25})`; ctx.fillRect(0,0,640,480); B.intro--; }
+}
+function drawHUD(){
+  const k = hudScale();
+  ctx.save(); ctx.scale(k, k);
+  ctx.fillStyle = "rgba(15,14,23,.78)"; ctx.fillRect(8, 8, 232, 72);
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.strokeRect(8, 8, 232, 72);
+  ctx.font = "10px 'Press Start 2P'"; ctx.textAlign = "left"; ctx.fillStyle = "#fff";
+  ctx.fillText(`ENERGÍA ${P.hp}/${HP_MAX}`, 18, 28);
+  R(18, 35, 212, 8, "#444"); R(18, 35, 212*P.hp/HP_MAX, 8, P.hp/HP_MAX > 0.3 ? "#5ce07a" : "#ff5d6c");
+  ctx.font = "13px serif"; ctx.fillStyle = "#fff"; ctx.fillText(`🧪×${P.potions}   ⭐×${ST.correct}`, 18, 59);
+  ctx.font = "8px 'Press Start 2P'"; ctx.fillStyle = "#ffd447"; ctx.fillText(`MISIONES ${questsDone()}/${MAIN.length}`, 18, 73);
+  R(132, 67, 98, 6, "#444"); R(132, 67, 98*questsDone()/MAIN.length, 6, "#5ce07a");
+  ctx.restore();
+}
+
+// ======================= LÓGICA DE MAPA =======================
+const DIRS = {up:[0,-1], down:[0,1], left:[-1,0], right:[1,0]};
+const entAt = (x,y) => ents.find(e => e.x===x && e.y===y);
+const solidTile = (x,y) => x<0 || y<0 || x>=MW || y>=MH || SOLID.has(map[y][x]);
+function updateMap(){
+  if (cooldown > 0){ cooldown--; return; }
+  if (P.moving){
+    P.prog += 0.125;
+    if (P.prog >= 1){ P.moving=false; P.x=P.tx; P.y=P.ty; P.prog=0; }
+    return;
+  }
+  const d = held[held.length-1] || tap; tap = null; if (!d) return;
+  P.dir = d; const [dx,dy] = DIRS[d], nx = P.x+dx, ny = P.y+dy;
+  const e = entAt(nx,ny);
+  if (e){ interact(e); return; }
+  if (!solidTile(nx,ny)){ P.moving=true; P.tx=nx; P.ty=ny; P.prog=0; }
+}
+function actionFace(){
+  const [dx,dy] = DIRS[P.dir], e = entAt(P.x+dx, P.y+dy);
+  if (e) interact(e);
+}
+function interact(e){
+  held = []; tap = null;
+  if (e.t === "D") return interact(STATION(e.k));
+  if (e.t === "C"){
+    if (e.open) say(["El cofre está vacío."], "Cofre");
+    else { e.open = true; P.potions += 2; sfx.chest(); say(["¡Encontraste 2 bebidas de energía! 🧪🧪", "Úsalas durante un reto para recuperar 15 de energía."], "Cofre"); }
+    return;
+  }
+  const k = e.k, who = STN_INFO[k].who;
+  if (isDone(k)) return say(TXT.thanks[k], who);
+  if (k > 1 && !isDone(k-1)) return say(TXT.locked(k), who);
+  if (!e.talked){ e.talked = true; say(TXT.lessons[k], who, () => startBattle(k)); }
+  else say(TXT.retry(k), who, () => startBattle(k));
+}
+
+// ======================= DIÁLOGOS Y UI =======================
+const ui = $("ui");
+function say(lines, who, done){ dlg = {lines, who, i:0, done}; state="dialog"; held=[]; sfx.talk(); renderDialog(); }
+function renderDialog(){
+  ui.innerHTML = `<div class="dlg" id="dlgBox"><b>${dlg.who||""}</b><div>${dlg.lines[dlg.i]}</div><span class="nx">▼</span></div>`;
+  $("dlgBox").onclick = advance;
+}
+function advance(){
+  if (!dlg) return;
+  dlg.i++; sfx.talk();
+  if (dlg.i >= dlg.lines.length){
+    const d = dlg.done; dlg = null; state = "map"; cooldown = 6; held = []; tap = null;
+    renderMapUI(); if (d) d();
+  } else renderDialog();
+}
+function objective(){
+  const q = curQuest();
+  return q ? q.obj : "¡Todas las misiones cumplidas!";
+}
+let questsOpen = false;
+try { const v = localStorage.getItem(SAVE_KEY + ".misiones"); if (v !== null) questsOpen = v === "1"; } catch(e){}
+function renderMapUI(){
+  if (state !== "map") return;
+  const tot = ST.correct + ST.wrong, done = questsDone(), N = MAIN.length, cur = curQuest();
+  const MIN = {1:5,2:5,3:5,4:6,5:5,6:4,7:4,8:5};
+  const items = QUESTS.map(q => {
+    const ok = q.done(), cls = ok ? "done" : q === cur ? "cur" : "";
+    return `<li class="${cls}">${ok ? "✅" : q === cur ? "👉" : "⬜"} ${q.t}${q.prog && !ok ? ` (${q.prog()})` : ""}${q.k && !ok ? ` <small>~${MIN[q.k]} min</small>` : ""}</li>`;
+  }).join("");
+  ui.innerHTML = `<div class="info"><div>🎯 <span class="obj">${objective()}</span></div>
+    <div class="quests"><details id="qd" ${questsOpen ? "open" : ""}><summary>🗺️ Misiones completadas: <b>${done} de ${N}</b> · te faltan ${N - done}</summary><ul>${items}</ul></details>
+    <div class="qbar"><i style="width:${Math.round(100*done/N)}%"></i></div></div>
+    <small>Aciertos: ${ST.correct}/${tot} · Pistas usadas: ${ST.hints}</small>
+    <div class="row"><button id="bForm">📜 Ver fórmulas</button><button id="bReset">↺ Reiniciar progreso</button></div></div>`;
+  $("bForm").onclick = () => say(TXT.formulas, "Pergamino del constructor");
+  const qd = $("qd");
+  qd.ontoggle = () => { if (!qd.isConnected) return; questsOpen = qd.open; try { localStorage.setItem(SAVE_KEY + ".misiones", questsOpen ? "1" : "0"); } catch(e){} };
+  const br = $("bReset"); let armed = false;
+  br.onclick = () => {
+    if (armed) return resetGame();
+    armed = true; br.textContent = "¿Borrar todo? Toca otra vez";
+    setTimeout(() => { if (br.isConnected){ armed = false; br.textContent = "↺ Reiniciar progreso"; } }, 4000);
+  };
+}
+
+// ======================= RETO (BATALLA) =======================
+function startBattle(k){
+  const m = {...OPP[k]};
+  B = {k, m, hp:m.hits, fx:[], flash:0, intro:25, calcOpen:false, phase:"ask"};
+  state = "battle"; held = []; tap = null; sfx.enc();
+  newQuestion(true);
+}
+function newQuestion(first){
+  B.prob = GEN[B.k][B.m.hits - B.hp](); B.hint = 0; B.phase = "ask";
+  B.note = first ? `¡<b>${B.m.name}</b> bloquea la obra! Resuelve ${B.m.hits} retos para vencerlo.` : `Reto ${B.m.hits - B.hp + 1} de ${B.m.hits}`;
+  renderBattle();
+}
+function renderBattle(){
+  const p = B.prob, tgt = B.calcOpen && B.target === "calc" ? "calc" : "ans";
+  if (B.phase === "ask"){
+    const prev = $("ans") ? $("ans").value : "", calcPrev = $("calcIn") ? $("calcIn").value : "";
+    const choice = p.kind === "choice";
+    ui.innerHTML = `
+      ${B.note ? `<div style="color:#b8b5d1;margin-bottom:6px">${B.note}</div>` : ""}
+      <div class="q">${p.text}</div>
+      ${p.datos || ""}
+      <div class="hintbox">${p.hints.slice(0,B.hint).map((h,i)=>`💡 ${choice ? "Pista" : i ? "Sustituye" : "Fórmula"}: ${h}`).join("<br>")}</div>
+      ${choice ? `<div class="opts">${p.opts.map((o,i) => `<button type="button" data-i="${i}">${svgShape(o.s)}<span>${"ABCD"[i]}</span></button>`).join("")}</div>`
+      : `<form class="row" id="af" autocomplete="off"><input id="ans" ${TOUCH?'inputmode="none"':'inputmode="decimal"'} class="${tgt==="ans"?"tgt":""}" placeholder="Tu respuesta${p.unit?` (${p.unit})`:""}" value="${prev}"><button type="submit">⚔️ Responder</button></form>
+         ${TOUCH ? keypadHTML(tgt) : ""}`}
+      <div class="row btns">
+        <button id="bHint" ${B.hint>=2?"disabled":""}>💡 Pista</button>
+        <button id="bPot">🧪 Energía (${P.potions})</button>
+        ${choice ? "" : `<button id="bCalc">🧮 Calculadora</button>`}
+        <button id="bForm2">📜 Fórmulas</button>
+        <button id="bRun">🏃 Salir</button>
+      </div>
+      ${choice ? "" : `<div class="calc" id="calc" ${B.calcOpen?"":"hidden"}>
+        <small>Usa π, ^ para potencias y sqrt( ) para raíz. Ej: <code>π*3^2*8</code> · <code>4/3*π*5^3</code></small>
+        <input id="calcIn" ${TOUCH?'inputmode="none"':''} class="${tgt==="calc"?"tgt":""}" placeholder="${TOUCH?"Toca aquí y usa el teclado de arriba":"Escribe una operación"}" value="${calcPrev.replace(/"/g,"&quot;")}">
+        <div class="calcout" id="calcOut"></div>
+      </div>`}`;
+    $("bHint").onclick = () => { if (B.hint<2){ if (B.hint===0) ST.hints++; B.hint++; renderBattle(); } };
+    $("bPot").onclick = () => {
+      if (P.potions <= 0) B.note = "No tienes bebidas de energía. Búscalas en los cofres.";
+      else if (P.hp >= HP_MAX) B.note = "Tu energía ya está llena.";
+      else { P.potions--; P.hp = Math.min(HP_MAX, P.hp+15); B.note = "Recuperaste 15 de energía."; sfx.chest(); }
+      renderBattle();
+    };
+    $("bForm2").onclick = () => { B.showForm = true; B.phase = "form"; renderBattle(); };
+    $("bRun").onclick = () => { const k = B.k; endBattle(); say([`Saliste del reto. Cuando quieras, vuelve a hablar con ${STN_INFO[k].who}.`], ""); };
+    if (choice){
+      ui.querySelectorAll(".opts button").forEach(b => b.onclick = () => submit(+b.dataset.i));
+    } else {
+      $("af").onsubmit = ev => { ev.preventDefault(); submit(); };
+      $("bCalc").onclick = () => { B.calcOpen = !B.calcOpen; B.target = B.calcOpen ? "calc" : "ans"; renderBattle(); if (B.calcOpen && !TOUCH) $("calcIn").focus(); };
+      if (TOUCH){
+        $("ans").onpointerdown = () => { if (B.target !== "ans"){ B.target = "ans"; renderBattle(); } };
+        $("calcIn").onpointerdown = () => { if (B.target !== "calc"){ B.target = "calc"; renderBattle(); } };
+        ui.querySelectorAll(".kp button").forEach(b => b.onclick = () => kpPress(b.dataset.k));
+      }
+      const ci = $("calcIn"); ci.oninput = () => updCalc(); updCalc();
+      if (!B.calcOpen && matchMedia("(pointer:fine)").matches) $("ans").focus();
+    }
+  } else if (B.phase === "form"){
+    ui.innerHTML = `<div class="info">${TXT.formulas.join("<br><br>")}</div><div class="row"><button id="bBack" class="main">◀ VOLVER AL RETO</button></div>`;
+    $("bBack").onclick = () => { B.phase = "ask"; renderBattle(); };
+  } else {
+    ui.innerHTML = `<div class="res ${B.lastOk?"ok":"bad"}">${B.msg}</div>
+      <div class="sol">📐 ${p.sol}</div>
+      <button id="bNext" class="main">CONTINUAR ▶</button>`;
+    $("bNext").onclick = next; $("bNext").focus();
+  }
+}
+function keypadHTML(tgt){
+  const base = ["1","2","3","4","5","6","7","8","9","0",".","⌫"];
+  const fx = ["(",")","²","³","^","π","√","+","−","×","÷","C","➜ Resp."];
+  const keys = tgt === "calc" ? fx.concat(base) : base.concat(["−"]);
+  return `<div class="kp">${keys.map(k => `<button type="button" data-k="${k}" class="${k==="⌫"||k==="C"?"del":k==="➜ Resp."?"use":fx.includes(k)?"fx":""}">${k}</button>`).join("")}</div>`;
+}
+function kpPress(k){
+  const el = $(B.calcOpen && B.target === "calc" ? "calcIn" : "ans"); if (!el) return;
+  const rep = {"√":"sqrt(", "×":"*", "÷":"/", "−":"-", "²":"^2", "³":"^3"};
+  if (k === "⌫") el.value = el.value.slice(0,-1);
+  else if (k === "C") el.value = "";
+  else if (k === "➜ Resp."){
+    try { const r = calcEval(el.value); if (isFinite(r)){ $("ans").value = String(+r.toFixed(4)); B.target = "ans"; renderBattle(); } } catch(e){}
+    return;
+  } else el.value += rep[k] || k;
+  if (el.id === "calcIn") updCalc();
+}
+function updCalc(){
+  const ci = $("calcIn"), out = $("calcOut"); if (!ci) return;
+  if (!ci.value.trim()){ out.textContent = ""; return; }
+  try { const v = calcEval(ci.value); out.textContent = isFinite(v) ? "= " + (+v.toFixed(6)) : "…"; }
+  catch(e){ out.textContent = "…"; }
+}
+function calcEval(s){
+  s = s.toLowerCase().replace(/,/g,".").replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/√/g,"sqrt").replace(/π/g,"(pi)").replace(/²/g,"^2").replace(/³/g,"^3");
+  s = s.replace(/(\d|\))\s*\(/g, "$1*(").replace(/\)\s*(\d)/g, ")*$1");   // 2π → 2*(pi)
+  if (!/^[0-9+\-*/^().\sa-z]*$/.test(s)) throw 0;
+  const ok = ["sqrt","pi"];
+  if ((s.match(/[a-z]+/g)||[]).some(w => !ok.includes(w))) throw 0;
+  s = s.replace(/\^/g,"**");
+  return new Function("sqrt", "pi", `return (${s});`)(Math.sqrt, Math.PI);
+}
+function submit(choiceIdx){
+  const p = B.prob; let ok, given;
+  if (p.kind === "choice"){ ok = choiceIdx === p.answer; given = `la opción ${"ABCD"[choiceIdx]}`; }
+  else {
+    const inp = $("ans"), v = parseFloat(inp.value.replace(",", "."));
+    if (isNaN(v)){ inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); return; }
+    ok = Math.abs(v - p.answer) <= p.tol; given = String(v);
+  }
+  const u = p.unit ? " " + p.unit : "";
+  if (ok){
+    ST.correct++; B.hp--; B.flash = 24; sfx.hit();
+    B.fx.push({text:"¡BIEN!", y:150, t:50, c:"#ffd447"});
+    B.msg = `✔ ¡Correcto! ${p.ansTxt}${u}.`;
+  } else {
+    ST.wrong++; P.hp = Math.max(0, P.hp - DANO); sfx.hurt(); shakeScreen();
+    B.fx.push({text:`-${DANO}`, y:140, t:50, c:"#ff5d6c"});
+    B.msg = `✘ Respondiste ${given}, pero la respuesta es ${p.ansTxt}${u}. Pierdes ${DANO} de energía. Revisa el procedimiento:`;
+  }
+  B.lastOk = ok; B.phase = "result"; B.resAt = performance.now(); renderBattle();
+}
+function next(){
+  if (performance.now() - B.resAt < 250) return;
+  if (B.hp <= 0) return win();
+  if (P.hp <= 0) return lose();
+  newQuestion(false);
+}
+function endBattle(){ state = "map"; const b = B; B = null; cooldown = 10; held = []; tap = null; renderMapUI(); return b; }
+function win(){
+  const k = B.k, m = B.m;
+  ST.done[k-1] = true; sfx.lvl();
+  if (k === 6){ const g = STATION(6); g.x = 21; g.y = 11; }     // la guardiana se hace a un lado
+  if (k === 8){ B = null; sfx.win(); say([`¡Venciste al ${m.name}!`, "Ciudad Volumen está reconstruida y el Barrio de los Patrones vuelve a brillar."], "", endGame); state = "dialog"; return; }
+  const lines = [`¡Misión ${k} completada! ${m.name} se retira. ⭐`];
+  if (P.hp < HP_MAX){ P.hp = Math.min(HP_MAX, P.hp + 10); lines.push("Descansas un momento: +10 de energía."); }
+  lines.push(`Siguiente: ${curQuest() ? curQuest().obj : ""}`);
+  endBattle(); save();
+  say(TXT.thanks[k].concat(lines), STN_INFO[k].who);
+}
+function lose(){
+  const k = B.k; endBattle(); P.hp = HP_MAX;
+  say(["Te quedaste sin energía...", `${STN_INFO[k].who} te da agua y un descanso. Tu energía está completa.`, "Repasa las fórmulas con el botón 📜 y vuelve a hablar conmigo para intentarlo de nuevo."], STN_INFO[k].who);
+}
+let shakeT = 0;
+function shakeScreen(){ shakeT = 14; }
+
+// ======================= FIN DEL JUEGO =======================
+function endGame(){
+  state = "end";
+  const tot = ST.correct + ST.wrong, pct = tot ? Math.round(100*ST.correct/tot) : 0;
+  const mins = Math.max(1, Math.round((ST.ms || (Date.now()-ST.t0))/60000));
+  if (!ST.fin) ST.fin = Date.now();
+  save();
+  const fecha = new Date(ST.fin).toLocaleString("es-MX", {dateStyle:"long", timeStyle:"short"});
+  const ov = $("overlay"); ov.hidden = false;
+  ov.innerHTML = `<div class="cert"><h2>🏆 CERTIFICADO 🏆</h2>
+    <p><b>${escapeHtml(P.name)}</b> completó las 8 misiones de Ciudad Volumen: volúmenes de cuerpos regulares y compuestos, secuencias y sucesiones.</p>
+    <table><tr><td>Respuestas correctas</td><td>${ST.correct} / ${tot}</td></tr>
+    <tr><td>Precisión</td><td>${pct}%</td></tr><tr><td>Pistas usadas</td><td>${ST.hints}</td></tr>
+    <tr><td>Tiempo</td><td>${mins} min</td></tr></table>
+    <p style="font-size:13px">Razonamiento Matemático III · ${fecha}</p>
+    <p style="font-size:13px"><b>Toma una captura de pantalla</b> y envíala a tu profesor.</p></div>
+    <button class="main" id="againBtn">↻ JUGAR OTRA VEZ</button>`;
+  $("againBtn").onclick = resetGame;
+  ui.innerHTML = `<div class="info">¡Felicidades! 🎉</div>`;
+}
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+// ======================= ENTRADA =======================
+const KEYMAP = {ArrowUp:"up", ArrowDown:"down", ArrowLeft:"left", ArrowRight:"right", w:"up", s:"down", a:"left", d:"right", W:"up", S:"down", A:"left", D:"right"};
+addEventListener("keydown", e => {
+  const tag = e.target.tagName;
+  if (tag === "INPUT" || tag === "BUTTON" && (e.key === "Enter" || e.key === " ")) return;
+  if (state === "battle"){ if ((e.key==="Enter"||e.key===" ") && B && B.phase==="result"){ e.preventDefault(); next(); } return; }
+  if (state === "dialog"){ if (["Enter"," ","z","Z"].includes(e.key) || KEYMAP[e.key]){ e.preventDefault(); if (!e.repeat && !KEYMAP[e.key]) advance(); } return; }
+  if (state === "map"){
+    const d = KEYMAP[e.key];
+    if (d){ e.preventDefault(); if (!e.repeat && !held.includes(d)){ held.push(d); if (!P.moving) tap = d; } }
+    else if (e.key==="Enter" || e.key===" "){ e.preventDefault(); if (!e.repeat) actionFace(); }
+  }
+});
+addEventListener("keyup", e => { const d = KEYMAP[e.key]; if (d) held = held.filter(h => h !== d); });
+addEventListener("blur", () => held = []);
+document.querySelectorAll(".dpad button").forEach(btn => {
+  const d = btn.dataset.d;
+  btn.addEventListener("pointerdown", e => { e.preventDefault(); if (state==="map" && !held.includes(d)){ held.push(d); if (!P.moving) tap = d; } });
+  ["pointerup","pointerleave","pointercancel"].forEach(ev => btn.addEventListener(ev, () => held = held.filter(h => h !== d)));
+});
+$("aBtn").addEventListener("pointerdown", e => { e.preventDefault(); if (state==="dialog") advance(); else if (state==="map") actionFace(); });
+function setTouch(v){ TOUCH = v; $("pad").classList.toggle("on", v); if (v && state === "battle" && B && B.phase === "ask") renderBattle(); }
+setTouch(detectTouch());
+addEventListener("pointerdown", e => { if (e.pointerType === "touch" && !TOUCH) setTouch(true); }, true);
+
+$("startBtn").onclick = () => {
+  const n = $("nameIn").value.trim();
+  if (!n){ const i = $("nameIn"); i.classList.remove("shake"); void i.offsetWidth; i.classList.add("shake"); i.focus(); return; }
+  if (!TOUCH && detectTouch()) setTouch(true);
+  try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+  P.name = n; ST.t0 = Date.now(); $("overlay").hidden = true; state = "map";
+  beep(1,.01);
+  say(TXT.intro, "Narrador");
+  save();
+};
+function continueGame(d){
+  applySave(d);
+  if (!TOUCH && detectTouch()) setTouch(true);
+  $("overlay").hidden = true; state = "map";
+  beep(1,.01);
+  if (d.done || isDone(8)) return endGame();
+  say([`¡Bienvenido de vuelta, ${escapeHtml(P.name)}! Tu progreso estaba guardado en este navegador.`, `Llevas ${questsDone()} de ${MAIN.length} misiones. ${objective()}`], "Narrador");
+}
+$("nameIn").addEventListener("keydown", e => { if (e.key === "Enter") $("startBtn").click(); });
+
+// ======================= BUCLE =======================
+let lastNow = performance.now();
+function loop(){
+  T++;
+  const now = performance.now();
+  if ((state === "map" || state === "dialog" || state === "battle") && !document.hidden) ST.ms += Math.min(250, now - lastNow);
+  lastNow = now;
+  if (T % 60 === 0) save();
+  if (state === "map") updateMap();
+  document.body.classList.toggle("battle", state === "battle");
+  $("pad").style.visibility = state === "end" ? "hidden" : "visible";
+  ctx.save();
+  if (shakeT > 0){ ctx.translate((Math.random()-.5)*10, (Math.random()-.5)*10); shakeT--; }
+  if (state === "battle" && B) drawBattle(); else drawMap();
+  ctx.restore();
+  if (state !== "title") drawHUD();
+  requestAnimationFrame(loop);
+}
+ui.innerHTML = `<div class="info">Escribe tu nombre y presiona <b>COMENZAR</b>.</div>`;
+const SAVED = readSave();
+if (SAVED){
+  const box = document.createElement("div"); box.id = "contBox";
+  const nq = SAVED.ST.done.filter(Boolean).length;
+  box.innerHTML = `<p>Partida guardada en este navegador: <b>${escapeHtml(SAVED.P.name)}</b> · Misiones ${nq} de ${MAIN.length}</p>
+    <button class="main" id="contBtn">▶ CONTINUAR</button>
+    <p style="font-size:13px">o escribe un nombre para empezar una partida NUEVA (se borra la anterior):</p>`;
+  $("overlay").insertBefore(box, $("nameIn"));
+  $("overlay").querySelector("p").hidden = true;
+  $("startBtn").textContent = "NUEVA PARTIDA"; $("startBtn").classList.remove("main");
+  $("contBtn").onclick = () => continueGame(SAVED);
+  ui.innerHTML = `<div class="info">Presiona <b>CONTINUAR</b> para seguir donde te quedaste.</div>`;
+}
+loop();
+</script>
+</body>
+</html>
