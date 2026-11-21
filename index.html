@@ -41,7 +41,16 @@ button.main:hover{background:#3a82d0}
 .res{font-weight:700;margin-bottom:6px}
 .res.ok{color:var(--good)} .res.bad{color:var(--bad)}
 .sol{background:#2a2750;border-left:4px solid var(--accent);padding:8px 10px;border-radius:4px;margin:6px 0 10px;font-family:"Cambria Math","Times New Roman",serif;font-size:17px;line-height:1.7}
-.calc{margin-top:8px;padding:8px;background:#2a2750;border-radius:4px}
+.calc2{margin-top:8px;padding:8px;background:#2a2750;border-radius:6px;max-width:420px}
+.cdisp{background:#dfe9d8;color:#1d2a1d;border-radius:4px;padding:6px 10px;text-align:right;margin-bottom:6px;min-height:62px;border:2px solid #9fb59a}
+.cexpr{font-size:20px;word-break:break-all;min-height:1.2em;font-family:"Cambria Math","Times New Roman",serif}
+.cres{font-size:24px;font-weight:700;font-family:monospace;min-height:1.2em}
+.ckeys{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.ckeys button{padding:0;height:46px;font-size:20px;font-weight:700;background:#3b3769}
+.ckeys button.op{background:#4a3f7a}
+.ckeys button.del{background:#7a2f3a}
+.ckeys button.eq{background:#2a6cb3}
+.ckeys button.use{grid-column:1 / -1;background:#2f7a45;font-size:15px;height:44px}
 .calc input{width:100%;font-size:15px;padding:6px 8px;border-radius:4px;border:2px solid #aaa;font-family:monospace}
 .calc small{color:var(--muted)}
 .calcout{font-family:monospace;font-size:17px;color:var(--accent);margin-top:4px;min-height:1.3em}
@@ -118,6 +127,7 @@ code{background:#2a2750;padding:1px 4px;border-radius:3px;word-break:break-all}
   .q{font-size:15px}
   .btns button{font-size:13px;padding:5px 7px}
   .kp button{height:36px;font-size:16px}
+  .ckeys button{height:36px;font-size:17px}
   .sol{font-size:15px}
   #overlay{gap:8px}
   #overlay p{font-size:12px}
@@ -207,7 +217,7 @@ const TXT = {
         "Un CILINDRO es un prisma de base circular. El área de la base es π · r², así que:<br>" + fm(F.cilindro),
         "Si te dan el DIÁMETRO, divídelo entre 2 para obtener el radio: r = d ÷ 2.",
         "Medio cilindro (semicilindro) es la mitad:<br>" + fm(F.semicil),
-        "Usa π ≈ 3.1416 (la calculadora del juego tiene la tecla π). Redondea a 1 decimal."],
+        "Usa π ≈ 3.1416. La calculadora del juego (botón 🧮) tiene teclas de π, x² y x³: escribes la operación como en una calculadora normal. Redondea a 1 decimal."],
     3: ["Desde el observatorio vemos el cielo... pero la pirámide de la entrada y la cúpula se agrietaron.",
         "Una PIRÁMIDE cabe exactamente 3 veces en un prisma con la misma base y altura. Por eso:<br>" + fm(F.piramide),
         "Una ESFERA se calcula solo con su radio:<br>" + fm(F.esfera),
@@ -1365,14 +1375,14 @@ function startBattle(k){
   newQuestion(true);
 }
 function newQuestion(first){
-  B.prob = GEN[B.k][B.m.hits - B.hp](); B.hint = 0; B.phase = "ask";
+  B.prob = GEN[B.k][B.m.hits - B.hp](); B.hint = 0; B.phase = "ask"; CALC.t = []; CALC.fresh = false;
   B.note = first ? `¡<b>${B.m.name}</b> bloquea la obra! Resuelve ${B.m.hits} retos para vencerlo.` : `Reto ${B.m.hits - B.hp + 1} de ${B.m.hits}`;
   renderBattle();
 }
 function renderBattle(){
-  const p = B.prob, tgt = B.calcOpen && B.target === "calc" ? "calc" : "ans";
+  const p = B.prob;
   if (B.phase === "ask"){
-    const prev = $("ans") ? $("ans").value : "", calcPrev = $("calcIn") ? $("calcIn").value : "";
+    const prev = $("ans") ? $("ans").value : "";
     const choice = p.kind === "choice";
     ui.innerHTML = `
       ${B.note ? `<div style="color:#b8b5d1;margin-bottom:6px">${B.note}</div>` : ""}
@@ -1380,20 +1390,16 @@ function renderBattle(){
       ${p.datos || ""}
       <div class="hintbox">${p.hints.slice(0,B.hint).map((h,i)=>`💡 ${choice ? "Pista" : i ? "Sustituye" : "Fórmula"}: ${h}`).join("<br>")}</div>
       ${choice ? `<div class="opts">${p.opts.map((o,i) => `<button type="button" data-i="${i}">${svgShape(o.s)}<span>${"ABCD"[i]}</span></button>`).join("")}</div>`
-      : `<form class="row" id="af" autocomplete="off"><input id="ans" ${TOUCH?'inputmode="none"':'inputmode="decimal"'} class="${tgt==="ans"?"tgt":""}" placeholder="Tu respuesta${p.unit?` (${p.unit})`:""}" value="${prev}"><button type="submit">⚔️ Responder</button></form>
-         ${TOUCH ? keypadHTML(tgt) : ""}`}
+      : `<form class="row" id="af" autocomplete="off"><input id="ans" ${TOUCH?'inputmode="none"':'inputmode="decimal"'} class="${B.calcOpen?"":"tgt"}" placeholder="Tu respuesta${p.unit?` (${p.unit})`:""}" value="${prev}"><button type="submit">⚔️ Responder</button></form>
+         ${TOUCH && !B.calcOpen ? keypadHTML() : ""}`}
       <div class="row btns">
         <button id="bHint" ${B.hint>=2?"disabled":""}>💡 Pista</button>
         <button id="bPot">🧪 Energía (${P.potions})</button>
-        ${choice ? "" : `<button id="bCalc">🧮 Calculadora</button>`}
+        ${choice ? "" : `<button id="bCalc">${B.calcOpen ? "✖ Cerrar calculadora" : "🧮 Calculadora"}</button>`}
         <button id="bForm2">📜 Fórmulas</button>
         <button id="bRun">🏃 Salir</button>
       </div>
-      ${choice ? "" : `<div class="calc" id="calc" ${B.calcOpen?"":"hidden"}>
-        <small>Usa π, ^ para potencias y sqrt( ) para raíz. Ej: <code>π*3^2*8</code> · <code>4/3*π*5^3</code></small>
-        <input id="calcIn" ${TOUCH?'inputmode="none"':''} class="${tgt==="calc"?"tgt":""}" placeholder="${TOUCH?"Toca aquí y usa el teclado de arriba":"Escribe una operación"}" value="${calcPrev.replace(/"/g,"&quot;")}">
-        <div class="calcout" id="calcOut"></div>
-      </div>`}`;
+      ${choice || !B.calcOpen ? "" : calcHTML()}`;
     $("bHint").onclick = () => { if (B.hint<2){ if (B.hint===0) ST.hints++; B.hint++; renderBattle(); } };
     $("bPot").onclick = () => {
       if (P.potions <= 0) B.note = "No tienes bebidas de energía. Búscalas en los cofres.";
@@ -1407,13 +1413,10 @@ function renderBattle(){
       ui.querySelectorAll(".opts button").forEach(b => b.onclick = () => submit(+b.dataset.i));
     } else {
       $("af").onsubmit = ev => { ev.preventDefault(); submit(); };
-      $("bCalc").onclick = () => { B.calcOpen = !B.calcOpen; B.target = B.calcOpen ? "calc" : "ans"; renderBattle(); if (B.calcOpen && !TOUCH) $("calcIn").focus(); };
-      if (TOUCH){
-        $("ans").onpointerdown = () => { if (B.target !== "ans"){ B.target = "ans"; renderBattle(); } };
-        $("calcIn").onpointerdown = () => { if (B.target !== "calc"){ B.target = "calc"; renderBattle(); } };
-        ui.querySelectorAll(".kp button").forEach(b => b.onclick = () => kpPress(b.dataset.k));
-      }
-      const ci = $("calcIn"); ci.oninput = () => updCalc(); updCalc();
+      $("bCalc").onclick = () => { B.calcOpen = !B.calcOpen; renderBattle(); if (B.calcOpen) $("calc2").scrollIntoView({block:"nearest"}); };
+      if (TOUCH) ui.querySelectorAll(".kp button").forEach(b => b.onclick = () => kpPress(b.dataset.k));
+      if (B.calcOpen){ ui.querySelectorAll(".ckeys button").forEach(b => b.onclick = () => calcPress(b.dataset.k)); calcShow(); }
+      if (TOUCH && B.calcOpen) $("ans").onpointerdown = () => { B.calcOpen = false; renderBattle(); };
       if (!B.calcOpen && matchMedia("(pointer:fine)").matches) $("ans").focus();
     }
   } else if (B.phase === "form"){
@@ -1421,37 +1424,65 @@ function renderBattle(){
     $("bBack").onclick = () => { B.phase = "ask"; renderBattle(); };
   } else {
     ui.innerHTML = `<div class="res ${B.lastOk?"ok":"bad"}">${B.msg}</div>
-      <div class="sol">📐 ${p.sol}</div>
+      <div class="sol">📐 ${p.sol.replace(/En la calculadora: ([^<]*)/, (m, ex) => "En la calculadora: " + calcKeys(ex))}</div>
       <button id="bNext" class="main">CONTINUAR ▶</button>`;
     $("bNext").onclick = next; $("bNext").focus();
   }
 }
-function keypadHTML(tgt){
-  const base = ["1","2","3","4","5","6","7","8","9","0",".","⌫"];
-  const fx = ["(",")","²","³","^","π","√","+","−","×","÷","C","➜ Resp."];
-  const keys = tgt === "calc" ? fx.concat(base) : base.concat(["−"]);
-  return `<div class="kp">${keys.map(k => `<button type="button" data-k="${k}" class="${k==="⌫"||k==="C"?"del":k==="➜ Resp."?"use":fx.includes(k)?"fx":""}">${k}</button>`).join("")}</div>`;
+const calcKeys = ex => ex.replace(/\^2/g, " x²").replace(/\^3/g, " x³").replace(/\^/g, " xʸ ").replace(/\*/g, " × ").replace(/\//g, " ÷ ").replace(/-/g, " − ").replace(/\+/g, " + ").replace(/\s+/g, " ").trim();
+function keypadHTML(){
+  const keys = ["1","2","3","4","5","6","7","8","9","0",".","⌫","−"];
+  return `<div class="kp">${keys.map(k => `<button type="button" data-k="${k}" class="${k==="⌫"?"del":k==="−"?"fx":""}">${k}</button>`).join("")}</div>`;
 }
 function kpPress(k){
-  const el = $(B.calcOpen && B.target === "calc" ? "calcIn" : "ans"); if (!el) return;
-  const rep = {"√":"sqrt(", "×":"*", "÷":"/", "−":"-", "²":"^2", "³":"^3"};
-  if (k === "⌫") el.value = el.value.slice(0,-1);
-  else if (k === "C") el.value = "";
-  else if (k === "➜ Resp."){
-    try { const r = calcEval(el.value); if (isFinite(r)){ $("ans").value = String(+r.toFixed(4)); B.target = "ans"; renderBattle(); } } catch(e){}
-    return;
-  } else el.value += rep[k] || k;
-  if (el.id === "calcIn") updCalc();
+  const el = $("ans"); if (!el) return;
+  if (k === "⌫") el.value = el.value.slice(0,-1); else el.value += k === "−" ? "-" : k;
 }
-function updCalc(){
-  const ci = $("calcIn"), out = $("calcOut"); if (!ci) return;
-  if (!ci.value.trim()){ out.textContent = ""; return; }
-  try { const v = calcEval(ci.value); out.textContent = isFinite(v) ? "= " + (+v.toFixed(6)) : "…"; }
-  catch(e){ out.textContent = "…"; }
+// ---- Calculadora común (de botones) ----
+// Cada tecla agrega una "pieza": lo que se ve (d) y lo que se calcula (e).
+const CALC = {t:[], fresh:false};
+const CKEYS = [
+  ["C","del"],["⌫","del"],["(","op"],[")","op"],["÷","op"],
+  ["7"],["8"],["9"],["√","op"],["×","op"],
+  ["4"],["5"],["6"],["x²","op"],["−","op"],
+  ["1"],["2"],["3"],["x³","op"],["+","op"],
+  ["0"],["."],["π","op"],["xʸ","op"],["=","eq"],
+];
+const CMAP = {"÷":["÷","/"], "×":["×","*"], "−":["−","-"], "+":["+","+"], "√":["√(","sqrt("], "x²":["²","^2"], "x³":["³","^3"], "xʸ":["^","^"], "π":["π","π"], "(":["(","("], ")":[")",")"]};
+function calcHTML(){
+  return `<div class="calc2" id="calc2"><div class="cdisp"><div class="cexpr" id="cexpr"></div><div class="cres" id="cres"></div></div>
+    <div class="ckeys">${CKEYS.map(([k,c]) => `<button type="button" data-k="${k}" class="${c||""}">${k}</button>`).join("")}
+    <button type="button" data-k="use" class="use">➜ Usar el resultado como mi respuesta</button></div></div>`;
+}
+const calcExpr = () => { let e = CALC.t.map(x => x.e).join(""); const open = (e.match(/\(/g)||[]).length - (e.match(/\)/g)||[]).length; return e + ")".repeat(Math.max(0, open)); };
+function calcValue(){ try { const v = calcEval(calcExpr()); return isFinite(v) ? v : null; } catch(e){ return null; } }
+function calcShow(msg){
+  const ex = $("cexpr"), rs = $("cres"); if (!ex) return;
+  ex.textContent = CALC.t.map(x => x.d).join("") || "0";
+  const v = CALC.t.length ? calcValue() : null;
+  rs.textContent = msg || (v === null ? (CALC.t.length ? "…" : "") : "= " + (+v.toFixed(6)));
+}
+function calcPress(k){
+  if (k === "C"){ CALC.t = []; CALC.fresh = false; }
+  else if (k === "⌫"){ CALC.t.pop(); CALC.fresh = false; }
+  else if (k === "="){
+    const v = calcValue(); if (v === null) return calcShow("Revisa la operación");
+    const r = String(+v.toFixed(6)); CALC.t = [{d:r, e:r}]; CALC.fresh = true;
+  } else if (k === "use"){
+    const v = calcValue(); if (v === null) return calcShow("Primero escribe una operación");
+    $("ans").value = String(+v.toFixed(4)); B.calcOpen = false; renderBattle(); return;
+  } else {
+    const isNum = /^[0-9.]$/.test(k);
+    if (CALC.fresh && (isNum || k === "π" || k === "√" || k === "(")) CALC.t = [];   // después de "=", un número empieza de nuevo
+    CALC.fresh = false;
+    const [d, e] = isNum ? [k, k] : CMAP[k];
+    CALC.t.push({d, e});
+  }
+  calcShow();
 }
 function calcEval(s){
   s = s.toLowerCase().replace(/,/g,".").replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/√/g,"sqrt").replace(/π/g,"(pi)").replace(/²/g,"^2").replace(/³/g,"^3");
-  s = s.replace(/(\d|\))\s*\(/g, "$1*(").replace(/\)\s*(\d)/g, ")*$1");   // 2π → 2*(pi)
+  s = s.replace(/(\d|\))\s*(\(|sqrt)/g, "$1*$2").replace(/\)\s*(\d)/g, ")*$1");   // 2π → 2*(pi)
   if (!/^[0-9+\-*/^().\sa-z]*$/.test(s)) throw 0;
   const ok = ["sqrt","pi"];
   if ((s.match(/[a-z]+/g)||[]).some(w => !ok.includes(w))) throw 0;
@@ -1530,7 +1561,15 @@ const KEYMAP = {ArrowUp:"up", ArrowDown:"down", ArrowLeft:"left", ArrowRight:"ri
 addEventListener("keydown", e => {
   const tag = e.target.tagName;
   if (tag === "INPUT" || tag === "BUTTON" && (e.key === "Enter" || e.key === " ")) return;
-  if (state === "battle"){ if ((e.key==="Enter"||e.key===" ") && B && B.phase==="result"){ e.preventDefault(); next(); } return; }
+  if (state === "battle"){
+    if ((e.key==="Enter"||e.key===" ") && B && B.phase==="result"){ e.preventDefault(); next(); return; }
+    if (B && B.phase === "ask" && B.calcOpen){
+      const km = {"*":"×", "/":"÷", "-":"−", "+":"+", "(":"(", ")":")", "Enter":"=", "=":"=", "Backspace":"⌫", "Escape":"C", "p":"π", "^":"xʸ"};
+      const k = /^[0-9.]$/.test(e.key) ? e.key : km[e.key];
+      if (k){ e.preventDefault(); calcPress(k); }
+    }
+    return;
+  }
   if (state === "dialog"){ if (["Enter"," ","z","Z"].includes(e.key) || KEYMAP[e.key]){ e.preventDefault(); if (!e.repeat && !KEYMAP[e.key]) advance(); } return; }
   if (state === "map"){
     const d = KEYMAP[e.key];
