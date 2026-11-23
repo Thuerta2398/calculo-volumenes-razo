@@ -5,7 +5,7 @@ El estudiante es aprendiz de constructor: reconstruye Ciudad Volumen calculando 
 
 **Jugar:** https://thuerta2398.github.io/calculo-volumenes-razo/
 
-## Misiones (≈ 40 min)
+## Misiones (≈ 38 min)
 
 | # | Misión | Tema | Retos | Tiempo |
 |---|---|---|---|---|
@@ -15,8 +15,8 @@ El estudiante es aprendiz de constructor: reconstruye Ciudad Volumen calculando 
 | 4 | El taller | Compuestas por suma: casa (prisma + techo), silo (cilindro + semiesfera), techo con Pitágoras | 3 | ~6 min |
 | 5 | La pieza hueca | Compuestas por resta: bloque perforado, escalón (con verificación cara × profundidad), tubo | 3 | ~5 min |
 | 6 | La puerta de los símbolos | Secuencias lógicas visuales (lados, giros, cantidades, color) | 3 | ~4 min |
-| 7 | El puente aritmético | Término siguiente, término general aₙ = a₁ + (n − 1)·d, posición de un término | 3 | ~4 min |
-| 8 | La escalera final | Geométricas aₙ = a₁·rⁿ⁻¹, suma Sₙ y notación Σ | 4 | ~5 min |
+| 7 | El puente de los números | ¿Qué número sigue? Cambio igual (calentamiento), cambio que crece, cambio que alterna, doble o mitad. Sin fórmulas | 4 | ~4 min |
+| 8 | La escalera final | Patrones con figuras: escaleras de cubos (conteo = volumen), palillos en fila, letras o días de la semana | 3 | ~4 min |
 
 Las misiones se desbloquean en orden. Cada NPC da una mini lección con las fórmulas antes del reto. Los valores se generan al azar, así que cada alumno ve números distintos.
 
@@ -26,6 +26,7 @@ Las misiones se desbloquean en orden. Cada NPC da una mini lección con las fór
 - **Pistas** (2 por reto): la 1.ª muestra la fórmula y la 2.ª la fórmula con los valores sustituidos.
 - **Calculadora común de botones** (botón 🧮): dígitos, + − × ÷, paréntesis, π, x², x³, xʸ, √ e =. Se escribe como en una calculadora normal, por ejemplo `π × 3 x² × 8 =`, y el botón **Usar el resultado como mi respuesta** pasa el número al campo de respuesta. En computadora también funciona con el teclado.
 - Tolerancia: ±0.6 % en volúmenes (se acepta π ≈ 3.14 o 3.1416); valores exactos en sucesiones.
+- Las sucesiones (misiones 6 a 8) se resuelven observando cómo cambia un término al siguiente: no requieren fórmulas ni clase previa.
 - **Progreso guardado** en el navegador (botones Continuar / Reiniciar) y lista de misiones "X de 8".
 - Al terminar aparece un **certificado** con nombre, aciertos, precisión, pistas y tiempo para enviar como captura.
 

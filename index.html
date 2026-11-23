@@ -186,10 +186,6 @@ const F = {
   esfera: `V = ${frac("4","3")} · π · r³`,
   semiesf: `V = ${frac("2","3")} · π · r³`,
   pitagoras: `c² = a² + b²`,
-  arit: `${sub("a","n")} = ${sub("a","1")} + (n − 1) · d`,
-  posicion: `n = ${frac(`${sub("a","n")} − ${sub("a","1")}`, "d")} + 1`,
-  geom: `${sub("a","n")} = ${sub("a","1")} · r<sup>n − 1</sup>`,
-  serie: `${sub("S","n")} = ${frac(`n · (${sub("a","1")} + ${sub("a","n")})`, "2")}`,
 };
 
 // ======================= TEXTOS =======================
@@ -200,8 +196,8 @@ const STN_INFO = {
   4: {who:"Carpintero Beto", place:"el taller", tema:"Compuestas (suma)", short:"El taller: figuras compuestas (suma)"},
   5: {who:"Escultora Mara", place:"el taller de piedra", tema:"Compuestas (resta)", short:"La pieza hueca: figuras compuestas (resta)"},
   6: {who:"Guardiana Sofía", place:"la puerta del puente", tema:"Secuencias lógicas", short:"La puerta de los símbolos: secuencias lógicas"},
-  7: {who:"Puentero Iker", place:"el puente de los números", tema:"Sucesiones aritméticas", short:"El puente aritmético: sucesiones aritméticas"},
-  8: {who:"Guardián de la Escalera", place:"la escalera final", tema:"Geométricas y series", short:"La escalera final: geométricas y series"},
+  7: {who:"Puentero Iker", place:"el puente de los números", tema:"Patrones numéricos", short:"El puente de los números: ¿qué número sigue?"},
+  8: {who:"Guardián de la Escalera", place:"la escalera final", tema:"Patrones con figuras", short:"La escalera final: patrones con figuras"},
 };
 const TXT = {
   intro: ["Un fuerte temblor sacudió Ciudad Volumen. Bodegas, torres y talleres quedaron dañados.",
@@ -239,16 +235,14 @@ const TXT = {
         "Para descubrir la regla de una secuencia de figuras observa:<br>1. Cambios de forma (lados, vértices).<br>2. Giros (horario o antihorario).<br>3. Colores o cantidades.",
         "Elige la figura que sigue. Resuelve 3 secuencias y te dejo pasar."],
     7: ["¡Bienvenido al Barrio de los Patrones! Este puente se construye con números.",
-        "Una sucesión es ARITMÉTICA si siempre se SUMA la misma cantidad: la diferencia d.<br>Ejemplo: 2, 5, 8, 11, ... tiene d = 3.",
-        "Término general:<br>" + fm(F.arit) + "<br>a₁ es el primer término y n la posición.",
-        "Para saber en qué posición está un número, despeja n:<br>" + fm(F.posicion),
-        "Resuelve 3 retos para cruzar."],
-    8: ["Soy el Guardián de la Escalera. Cada escalón crece más rápido que el anterior...",
-        "Una sucesión es GEOMÉTRICA si siempre se MULTIPLICA por la misma cantidad: la razón r.<br>r = (un término) ÷ (el anterior).",
-        "Término general:<br>" + fm(F.geom),
-        "Una SERIE es la SUMA de los términos de una sucesión. Se escribe con sigma:<br>" + fm(`${SIG("n","i = 1")} ${sub("a","i")} = ${sub("a","1")} + ${sub("a","2")} + ··· + ${sub("a","n")}`),
-        "En una aritmética, la suma de los primeros n términos es:<br>" + fm(F.serie),
-        "Supera mis 4 retos y Ciudad Volumen quedará reconstruida."],
+        "En una sucesión cada número sigue una REGLA. Para descubrirla, fíjate cuánto CAMBIA de un número al siguiente y escribe ese cambio debajo.<br>Ejemplo: 2, 5, 8, 11 → +3, +3, +3. ¡Sigue el 14!",
+        "El cambio no siempre es igual. A veces CRECE (+1, +2, +3, ...), a veces se ALTERNA (sube 3, baja 1, sube 3, ...) y a veces el número se DUPLICA o se parte a la MITAD.",
+        "No necesitas fórmulas: observa, anota los cambios y continúa el patrón. Resuelve 4 retos para cruzar."],
+    8: ["Soy el Guardián de la Escalera. Mis escalones están hechos de cubos y palillos...",
+        "Con figuras la estrategia es la misma: CUENTA las piezas de cada figura, escribe los conteos y fíjate cómo cambian de una figura a la siguiente.",
+        "Si te ayuda, dibuja la figura que sigue y cuéntala. ¡No hace falta fórmula!",
+        "También hay sucesiones de LETRAS o de DÍAS: fíjate cuántos lugares se salta cada vez.",
+        "Supera mis 3 retos y Ciudad Volumen quedará reconstruida."],
   },
   retry: k => [`¿Vamos de nuevo? Recuerda: puedes ver las fórmulas con el botón 📜 y pedir 💡 pistas.`],
   thanks: {
@@ -265,8 +259,7 @@ const TXT = {
   formulas: ["<b>Volumen de cuerpos regulares</b>" + fm(F.prisma,1) + fm(F.rect,1) + fm(F.triPrisma,1) + fm(F.piramide,1),
              "<b>Cuerpos redondos</b>" + fm(F.cilindro,1) + fm(F.semicil,1) + fm(F.esfera,1) + fm(F.semiesf,1) + "r = d ÷ 2 · π ≈ 3.1416",
              "<b>Figuras compuestas</b>: 1. Descompón. 2. Calcula cada parte. 3. Suma (o resta el hueco). 4. Verifica.<br>Pitágoras: " + fm(F.pitagoras) + "<br>Unidades: 1 m = 100 cm. Todo en la misma unidad antes de operar.",
-             "<b>Sucesiones</b><br>Aritmética (suma d): " + fm(F.arit,1) + fm(F.posicion,1) + "Geométrica (multiplica por r): " + fm(F.geom,1),
-             "<b>Series</b> (sumas): " + fm(`${SIG("n","i = 1")} ${sub("a","i")} = ${sub("a","1")} + ${sub("a","2")} + ··· + ${sub("a","n")}`,1) + fm(F.serie,1)],
+             "<b>Sucesiones sin fórmula</b>: escribe debajo cuánto cambia de un término al siguiente.<br>• Cambio igual: 2, 5, 8, 11 → +3, +3, +3<br>• Cambio que crece: 1, 2, 4, 7 → +1, +2, +3<br>• Cambio que alterna: 5, 8, 7, 10 → +3, −1, +3<br>• Doble o mitad: 3, 6, 12 → ×2 · 80, 40, 20 → ÷2<br>• Figuras: cuenta las piezas de cada figura y busca el patrón en los conteos."],
 };
 
 // Rival de cada misión (reutiliza los dibujos de monstruos)
@@ -277,8 +270,8 @@ const OPP = {
   4: {name:"Gólem de Ladrillo", hits:3, kind:"golem", color:"#b5603a"},
   5: {name:"Fantasma Hueco", hits:3, kind:"ghost", color:"#cfe8ff"},
   6: {name:"Slime Rúnico", hits:3, kind:"slime", color:"#c86bff"},
-  7: {name:"Murciélago Saltarín", hits:3, kind:"bat", color:"#5ce07a"},
-  8: {name:"Guardián de la Escalera", hits:4, kind:"golem", color:"#d4a017", boss:true},
+  7: {name:"Murciélago Saltarín", hits:4, kind:"bat", color:"#5ce07a"},
+  8: {name:"Guardián de la Escalera", hits:3, kind:"golem", color:"#d4a017", boss:true},
 };
 
 // ======================= UTILIDADES =======================
@@ -530,101 +523,83 @@ function m6Color(){
     ["Hay DOS patrones a la vez: uno de color y otro de posición.", "Los colores se repiten cada 3 figuras; la posición se alterna cada 2."],
     `Patrón doble: los colores se repiten en ciclo de 3 y la figura se alterna entre dos posiciones. La sexta figura repite el color de la tercera y la posición de la segunda.`);
 }
-// --- Misión 7: aritméticas ---
-const seqItems = (terms, askIdx, labs) => terms.map((v,i) => ({v: i === askIdx ? "?" : String(v), ask: i === askIdx, lab: labs ? labs[i] : ["a", String(i+1)]}));
-function m7Next(){
-  let a1 = rnd(-6, 20), d = pick([-7,-5,-4,-3,-2,2,3,4,5,6,7,8,9]);
-  const ask = pick([2,3,4]), terms = [0,1,2,3,4].map(i => a1 + i*d), V = terms[ask];
-  return numP({
-    text:`Completa la sucesión aritmética: ¿qué número va en el lugar del <b>?</b>`,
-    fig:{t:"seq", items: seqItems(terms, ask)},
-    datos:`<div class="datos">📐 Sucesión: ${terms.map((v,i) => i === ask ? "<b>?</b>" : v).join(", ")}, ...</div>`,
-    hints:["Calcula la diferencia d restando dos términos seguidos.", fm(`d = ${terms[ask === 0 ? 2 : 1]} − ${terms[ask === 0 ? 1 : 0]} = ${d}`)],
-    sol:`La diferencia es d = ${d} (se ${d > 0 ? "suma" : "resta"} ${Math.abs(d)} cada vez).<br>${sub("a", ask+1)} = ${terms[ask-1]} ${d > 0 ? "+" : "−"} ${Math.abs(d)} = <b>${V}</b>`,
-    answer:V, tol:0.01, unit:"", ansTxt:`${V}`,
-  });
+// --- Misión 7: ¿qué número sigue? (sin fórmulas) ---
+const seqItems = (terms, askIdx) => terms.map((v,i) => ({v: i === askIdx ? "?" : String(v), ask: i === askIdx, lab: ["", String(i+1)]}));
+const sgn = d => d < 0 ? `−${-d}` : `+${d}`;
+function nextP({text, terms, rule, steps, hint1}){
+  const V = terms[terms.length-1], shown = terms.slice(0,-1);
+  return {kind:"num", plain:true, text, fig:{t:"seq", items: seqItems(terms, terms.length-1)},
+    datos:`<div class="datos">📐 Sucesión: ${shown.join(", ")}, <b>?</b></div>`,
+    hints:[hint1, `Los cambios son ${steps.slice(0,-1).join(", ")}, ... ¿cuál sigue?`],
+    sol:`Cambios de un número al siguiente: ${steps.slice(0,-1).join(", ")} → el siguiente cambio es <b>${steps[steps.length-1]}</b>.<br>${rule}<br>${shown[shown.length-1]} → <b>${V}</b>`,
+    answer:V, tol:0.01, unit:"", ansTxt:`${V}`};
 }
-function m7Gen(){
-  const a1 = rnd(-5, 15), d = pick([2,3,4,5,6,7,-2,-3,-4]), n = rnd(12, 40), terms = [0,1,2,3].map(i => a1 + i*d), V = a1 + (n-1)*d;
-  const items = seqItems(terms, -1).concat([{gap:true}, {v:"?", ask:true, lab:["a", String(n)]}]);
-  return numP({
-    text:`Para la sucesión ${terms.join(", ")}, ... encuentra el término <b>${sub("a", n)}</b> (el que está en la posición ${n}).`,
-    fig:{t:"seq", items},
-    datos:`<div class="datos">📐 a₁ = ${a1} · d = ? · n = ${n} &nbsp;→&nbsp; Buscas: <b>${sub("a", n)}</b></div>`,
-    hints:[fm(F.arit) + ` con d = ${terms[1]} − ${terms[0]} = ${d}`, fm(`${sub("a",n)} = ${a1} + (${n} − 1) · ${d < 0 ? `(${d})` : d}`)],
-    sol:`d = ${terms[1]} − ${terms[0]} = ${d}<br>${sub("a",n)} = ${a1} + (${n} − 1) · ${d < 0 ? `(${d})` : d} = ${a1} + ${n-1} · ${d < 0 ? `(${d})` : d} = ${a1} ${(n-1)*d < 0 ? "−" : "+"} ${Math.abs((n-1)*d)} = <b>${V}</b>`,
-    answer:V, tol:0.01, unit:"", ansTxt:`${sub("a",n)} = ${V}`,
-  });
+function m7Warm(){
+  const a1 = rnd(1,20), d = rnd(2,9), terms = [0,1,2,3,4].map(i => a1 + i*d);
+  return nextP({text:`¿Qué número sigue en la sucesión?`, terms, steps: Array(4).fill(sgn(d)),
+    rule:`Regla: siempre se suma ${d}.`, hint1:"Resta dos números seguidos: ¿cuánto se suma cada vez?"});
 }
-function m7Pos(){
-  const a1 = rnd(-4, 12), d = pick([2,3,4,5,6,7,9]), n = rnd(8, 35), X = a1 + (n-1)*d, terms = [0,1,2,3].map(i => a1 + i*d);
-  const items = seqItems(terms, -1).concat([{gap:true}, {v:String(X), lab:["a","n"], ask:true, note:"n = ?"}]);
-  return numP({
-    text:`En la sucesión ${terms.join(", ")}, ... ¿en qué <b>posición n</b> aparece el número ${X}?`,
-    fig:{t:"seq", items},
-    datos:`<div class="datos">📐 a₁ = ${a1} · d = ? · ${sub("a","n")} = ${X} &nbsp;→&nbsp; Buscas: <b>n</b></div>`,
-    hints:[fm(F.posicion) + ` con d = ${d}`, fm(`n = ${frac(`${X} − ${a1 < 0 ? `(${a1})` : a1}`, d)} + 1`)],
-    sol:`d = ${terms[1]} − ${terms[0]} = ${d}<br>n = ${frac(`${X} − ${a1 < 0 ? `(${a1})` : a1}`, d)} + 1 = ${frac(X - a1, d)} + 1 = ${n-1} + 1 = <b>${n}</b>`,
-    answer:n, tol:0.01, unit:"", ansTxt:`n = ${n}`,
-  });
+function m7Grow(){
+  let v = rnd(1,10); const s0 = rnd(1,3), terms = [v], steps = [];
+  for (let i=0;i<5;i++){ const d = s0 + i; v += d; terms.push(v); steps.push(sgn(d)); }
+  return nextP({text:`¿Qué número sigue? <i>(El cambio no siempre es el mismo)</i>`, terms, steps,
+    rule:`Regla: lo que se suma crece de 1 en 1 (${steps.join(", ")}).`, hint1:"Escribe debajo cuánto aumenta de un número al siguiente. ¿Esos aumentos siguen un patrón?"});
 }
-// --- Misión 8: geométricas y series ---
-function m8Next(){
-  let a1, r;
-  if (Math.random() < 0.3){ a1 = pick([64,96,128,160,192]); r = 0.5; }
-  else { r = pick([2,3]); a1 = r === 3 ? rnd(1,3) : rnd(1,6); }
-  const terms = [0,1,2,3,4].map(i => a1 * r**i), V = terms[4];
-  return numP({
-    text:`Esta sucesión es <b>geométrica</b>. ¿Qué número sigue?`,
-    fig:{t:"seq", items: seqItems(terms, 4)},
-    datos:`<div class="datos">📐 Sucesión: ${terms.slice(0,4).join(", ")}, <b>?</b></div>`,
-    hints:["Divide un término entre el anterior para hallar la razón r.", fm(`r = ${frac(terms[1], terms[0])} = ${r === 0.5 ? frac(1,2) : r}`)],
-    sol:`r = ${terms[1]} ÷ ${terms[0]} = ${nf(r)} (cada término se multiplica por ${r === 0.5 ? frac(1,2) : r}).<br>${sub("a",5)} = ${terms[3]} · ${nf(r)} = <b>${V}</b>`,
-    answer:V, tol:0.01, unit:"", ansTxt:`${V}`,
-  });
+function m7Alt(){
+  const p = rnd(3,6), q = rnd(1,p-1); let v = rnd(2,12); const terms = [v], steps = [];
+  for (let i=0;i<5;i++){ const d = i%2 ? -q : p; v += d; terms.push(v); steps.push(sgn(d)); }
+  return nextP({text:`Esta sucesión sube y baja. ¿Qué número sigue?`, terms, steps,
+    rule:`Regla: se alterna: sube ${p}, baja ${q}, sube ${p}, baja ${q}, ...`, hint1:"Observa si de un número al siguiente sube o baja, y cuánto."});
 }
-function m8Gen(){
-  const r = pick([2,3]), a1 = r === 3 ? pick([1,2,3]) : pick([1,2,3,5]), n = r === 3 ? rnd(5,7) : rnd(6,9), V = a1 * r**(n-1);
-  const terms = [0,1,2].map(i => a1 * r**i);
-  const items = seqItems(terms, -1).concat([{gap:true}, {v:"?", ask:true, lab:["a", String(n)]}]);
-  return numP({
-    text:`Para la sucesión geométrica ${terms.join(", ")}, ... calcula ${sub("a", n)}.`,
-    fig:{t:"seq", items},
-    datos:`<div class="datos">📐 a₁ = ${a1} · r = ? · n = ${n} &nbsp;→&nbsp; Buscas: <b>${sub("a", n)}</b></div>`,
-    hints:[fm(F.geom) + ` con r = ${terms[1]} ÷ ${terms[0]} = ${r}`, fm(`${sub("a",n)} = ${a1} · ${r}<sup>${n} − 1</sup> = ${a1} · ${r}<sup>${n-1}</sup>`)],
-    sol:`r = ${terms[1]} ÷ ${terms[0]} = ${r}<br>${sub("a",n)} = ${a1} · ${r}<sup>${n-1}</sup> = ${a1} · ${r**(n-1)} = <b>${V}</b><small>En la calculadora: ${a1}*${r}^${n-1}</small>`,
-    answer:V, tol:0.01, unit:"", ansTxt:`${sub("a",n)} = ${V}`,
-  });
+function m7Dbl(){
+  if (Math.random() < 0.5){
+    const a1 = rnd(2,6), terms = [0,1,2,3,4].map(i => a1 * 2**i);
+    return nextP({text:`¿Qué número sigue?`, terms, steps: Array(4).fill("×2"),
+      rule:`Regla: cada número es el DOBLE del anterior.`, hint1:"Aquí no se suma lo mismo. Compara cada número con el anterior: ¿cuántas veces cabe?"});
+  }
+  const a1 = pick([96,128,160,192,320]), terms = [0,1,2,3,4].map(i => a1 / 2**i);
+  return nextP({text:`¿Qué número sigue?`, terms, steps: Array(4).fill("÷2"),
+    rule:`Regla: cada número es la MITAD del anterior.`, hint1:"Compara cada número con el anterior: ¿qué parte es?"});
 }
-function m8Serie(){
-  const a1 = rnd(1,9), d = rnd(2,6), n = rnd(6,10), an = a1 + (n-1)*d, S = n*(a1+an)/2, terms = [0,1,2,3].map(i => a1 + i*d);
-  const items = seqItems(terms, -1).concat([{gap:true}, {v:String(an), lab:["a", String(n)]}]);
-  return numP({
-    text:`Calcula la <b>suma de los primeros ${n} términos</b> de la sucesión ${terms.join(", ")}, ... (el término ${n} es ${an}).`,
-    fig:{t:"seq", items, title:`Suma de los primeros ${n} términos = ?`},
-    datos:`<div class="datos">📐 a₁ = ${a1} · ${sub("a",n)} = ${an} · n = ${n} &nbsp;→&nbsp; Buscas: <b>${sub("S",n)}</b></div>`,
-    hints:[fm(F.serie), fm(`${sub("S",n)} = ${frac(`${n} · (${a1} + ${an})`, "2")}`)],
-    sol:`${sub("S",n)} = ${frac(`${n} · (${a1} + ${an})`, "2")} = ${frac(`${n} · ${a1+an}`, "2")} = ${frac(n*(a1+an), "2")} = <b>${S}</b><br>✓ También puedes sumar término a término: ${Array.from({length:n}, (_,i) => a1+i*d).join(" + ")} = ${S}`,
-    answer:S, tol:0.01, unit:"", ansTxt:`${sub("S",n)} = ${S}`,
-  });
+// --- Misión 8: patrones con figuras ---
+function m8Stairs(){
+  const m = pick([4,5,6]), V = m*(m+1)/2, cnt = [1,3,6,10,15,21];
+  return {kind:"num", plain:true, text:`Cada escalera está hecha de cubos de 1 m³. ¿Cuántos cubos lleva la <b>escalera ${m}</b>? <i>(Ese número también es su volumen en m³)</i>`,
+    fig:{t:"stairs", ask:m},
+    datos:`<div class="datos">📐 Cuenta los cubos de las escaleras 1, 2 y 3 &nbsp;→&nbsp; Buscas: <b>cubos de la escalera ${m}</b></div>`,
+    hints:["Cuenta los cubos: escalera 1 → 1, escalera 2 → 3, escalera 3 → 6. ¿Cuánto aumenta cada vez?", "Aumenta +2, luego +3, luego +4... Cada escalera nueva agrega una columna más alta."],
+    sol:`Cubos: ${cnt.slice(0,m).join(", ")}<br>Cambios: ${cnt.slice(1,m).map((v,i) => "+" + (v - cnt[i])).join(", ")} (cada escalera agrega una columna de su número de cubos)<br>Escalera ${m}: 1 + 2 + ··· + ${m} = <b>${V} cubos</b> = ${V} m³`,
+    answer:V, tol:0.01, unit:"cubos", ansTxt:`${V}`};
 }
-function m8Sigma(){
-  const p = rnd(2,5), q = rnd(-3,5), n = rnd(4,6), terms = Array.from({length:n}, (_,i) => p*(i+1)+q), S = terms.reduce((s,v) => s+v, 0);
-  const expr = `${p}·i ${q < 0 ? "−" : "+"} ${Math.abs(q)}`;
-  return numP({
-    text:`Calcula el valor de la serie ${SIG(n, "i = 1")} (${expr}).`,
-    fig:{t:"sig", n, expr},
-    datos:`<div class="datos">📐 Sustituye i = 1, 2, ..., ${n} y suma los resultados.</div>`,
-    hints:[`Sustituye i = 1: ${p}·1 ${q < 0 ? "−" : "+"} ${Math.abs(q)} = ${terms[0]}; luego i = 2, i = 3, ... hasta i = ${n}.`, fm(terms.join(" + "))],
-    sol:`i = 1, 2, ..., ${n} → ${terms.join(", ")}<br>${SIG(n, "i = 1")} (${expr}) = ${terms.join(" + ")} = <b>${S}</b>`,
-    answer:S, tol:0.01, unit:"", ansTxt:`${S}`,
-  });
+function m8Sticks(){
+  const tri = Math.random() < 0.4, m = pick([5,6,7]), per = tri ? 2 : 3, V = per*m + 1, c = n => per*n + 1;
+  return {kind:"num", plain:true, text:`Con palillos se forman ${tri ? "triángulos" : "cuadrados"} en fila. ¿Cuántos palillos lleva la <b>figura ${m}</b>?`,
+    fig:{t:"sticks", tri, ask:m},
+    datos:`<div class="datos">📐 Cuenta los palillos de las figuras 1, 2 y 3 &nbsp;→&nbsp; Buscas: <b>palillos de la figura ${m}</b></div>`,
+    hints:[`Cuenta: figura 1 → ${c(1)}, figura 2 → ${c(2)}, figura 3 → ${c(3)}. ¿Cuánto aumenta?`, `Cada figura nueva agrega ${per} palillos. Sigue sumando hasta la figura ${m}.`],
+    sol:`Palillos: ${Array.from({length:m}, (_,i) => c(i+1)).join(", ")}<br>Cada ${tri ? "triángulo" : "cuadrado"} nuevo comparte un palillo con el anterior, así que se agregan <b>${per}</b> palillos cada vez.<br>Figura ${m}: <b>${V} palillos</b>`,
+    answer:V, tol:0.01, unit:"palillos", ansTxt:`${V}`};
+}
+function m8Words(){
+  const DIAS = ["lunes","martes","miércoles","jueves","viernes","sábado","domingo"], LET = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+  let list, k, i0;
+  if (Math.random() < 0.5){ list = DIAS; k = pick([2,3]); i0 = rnd(0,6); }
+  else { list = LET.split(""); k = pick([2,3]); i0 = rnd(0, LET.length - 1 - 4*k); }
+  const at = j => list[(i0 + j*k) % list.length], terms = [at(0), at(1), at(2), at(3)], ans = at(4);
+  const wrong = shuffle([...new Set([list[(i0 + 4*k - 1) % list.length], list[(i0 + 4*k + 1) % list.length], list[(i0 + 3*k + 1) % list.length], list[(i0 + 4*k + 2) % list.length]])].filter(w => w !== ans)).slice(0,3);
+  const opts = shuffle([{s:{txt:ans}, ok:true}, ...wrong.map(w => ({s:{txt:w}, ok:false}))]), ci = opts.findIndex(o => o.ok);
+  const dias = list === DIAS;
+  return {kind:"choice", text:`¿Qué ${dias ? "día" : "letra"} sigue?`, fig:{t:"seq", items: terms.map(v => ({v})).concat([{v:"?", ask:true}])}, opts, answer:ci, unit:"",
+    datos:`<div class="datos">📐 ${terms.join(", ")}, <b>?</b></div>`,
+    hints:[`Cuenta cuántos lugares hay de ${terms[0]} a ${terms[1]} ${dias ? "en la semana" : "en el abecedario"}.`, `Se avanza de ${k} en ${k}${dias ? " (después del domingo vuelve el lunes)" : " (el abecedario incluye la Ñ)"}.`],
+    sol:`Regla: se avanza <b>${k}</b> ${dias ? "días" : "letras"} cada vez: ${terms.join(" → ")} → <b>${ans}</b>.`,
+    ansTxt:`${ans}`};
 }
 // Orden de los retos en cada misión (el reto i usa GEN[k][i]; si fallas, se genera otro del mismo tipo)
 const GEN = {
   1:[m1Rect, m1Tri, m1Units], 2:[m2Cyl, m2Semi, m2Diam], 3:[m3Pyr, m3Sph, m3Hemi], 4:[m4House, m4Silo, m4Pyth],
   5:[m5Hole, m5Step, m5Tube], 6:[m6Sides, m6Arrow, () => Math.random() < 0.5 ? m6Dots() : m6Color()],
-  7:[m7Next, m7Gen, m7Pos], 8:[m8Next, m8Gen, m8Serie, m8Sigma],
+  7:[m7Warm, m7Grow, m7Alt, m7Dbl], 8:[m8Stairs, m8Sticks, m8Words],
 };
 
 // ======================= MAPA =======================
@@ -1176,6 +1151,49 @@ const FIG = {
     });
     return [];
   },
+  stairs(f, box, k){
+    const [bx,by,bw,bh] = box, dz = 0.42, gapU = 0.8, units = 1+2+3 + 3*dz + 3*gapU + 1.5;
+    const FS = Math.round(16*k), u = Math.min((bw - 12)/units, (bh - 3.2*FS)/(3 + dz));
+    ctx.font = `bold ${FS}px system-ui, sans-serif`; ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.fillText("Escaleras de cubos", bx + bw/2, by + FS + 4);
+    let x = bx + (bw - units*u)/2; const yb = by + bh/2 + (3 + dz)*u/2 + FS*0.2;
+    const cube = (cx, cy) => { const d = dz*u;
+      poly2([[cx, cy-u], [cx+d, cy-u-d], [cx+u+d, cy-u-d], [cx+u, cy-u]], "#f6e3a6", "#4a3416", 1.5);
+      poly2([[cx+u, cy], [cx+u, cy-u], [cx+u+d, cy-u-d], [cx+u+d, cy-d]], "#c79a43", "#4a3416", 1.5);
+      poly2([[cx, cy], [cx+u, cy], [cx+u, cy-u], [cx, cy-u]], "#e8c66f", "#4a3416", 1.5); };
+    for (let n=1; n<=3; n++){
+      for (let c=0; c<n; c++) for (let r=0; r<=c; r++) cube(x + c*u, yb - r*u);
+      ctx.font = `bold ${FS}px system-ui, sans-serif`; ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.fillText(`${n}`, x + n*u/2, yb + FS + 6);
+      x += (n + dz + gapU)*u;
+    }
+    const w = 1.5*u, h = Math.min(3*u, w*1.4);
+    ctx.fillStyle = "#ffe3e6"; ctx.strokeStyle = "#d62839"; ctx.lineWidth = 3; rrect(x, yb - h, w, h, 8); ctx.fill(); ctx.stroke();
+    ctx.font = `bold ${Math.round(h*0.45)}px system-ui`; ctx.fillStyle = "#d62839"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("?", x + w/2, yb - h/2); ctx.textBaseline = "alphabetic";
+    ctx.font = `bold ${FS}px system-ui, sans-serif`; ctx.fillText(`${f.ask}`, x + w/2, yb + FS + 6);
+    return [];
+  },
+  sticks(f, box, k){
+    const [bx,by,bw,bh] = box, segs = n => { const out = [];
+      if (!f.tri){ for (let i=0;i<=n;i++) out.push([[i,0],[i,1]]); for (let i=0;i<n;i++){ out.push([[i,0],[i+1,0]]); out.push([[i,1],[i+1,1]]); } return {out, w:n}; }
+      const H = 0.87; for (let t=0;t<n;t++){ const j = Math.floor(t/2);
+        if (t%2 === 0){ out.push([[j,0],[j+1,0]]); if (t===0) out.push([[j,0],[j+0.5,H]]); out.push([[j+1,0],[j+0.5,H]]); }
+        else { out.push([[j+0.5,H],[j+1.5,H]]); out.push([[j+1,0],[j+1.5,H]]); } }
+      return {out, w:(n+1)/2}; };
+    const F3 = [1,2,3].map(segs), totW = F3.reduce((a,g) => a + g.w, 0) + 3*0.7 + 1.2;
+    const FS = Math.round(16*k), u = Math.min((bw - 16)/totW, (bh - 4*FS)/1.3);
+    ctx.font = `bold ${FS}px system-ui, sans-serif`; ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.fillText(`${f.tri ? "Triángulos" : "Cuadrados"} con palillos`, bx + bw/2, by + FS + 4);
+    let x = bx + (bw - totW*u)/2; const yb = by + bh/2 + u/2 + FS*0.2;
+    F3.forEach((g, i) => {
+      for (const [[x1,y1],[x2,y2]] of g.out){ const a = [x + x1*u, yb - y1*u], b = [x + x2*u, yb - y2*u];
+        line2(a, b, "#7a4a1f", 7); line2(a, b, "#e2b874", 4.5); ell(b[0] + (a[0]-b[0])*0.06, b[1] + (a[1]-b[1])*0.06, 3.5, 3.5, "#d62839"); }
+      ctx.font = `bold ${FS}px system-ui, sans-serif`; ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.fillText(`${i+1}`, x + g.w*u/2, yb + FS + 10);
+      x += (g.w + 0.7)*u;
+    });
+    const w = 1.2*u, h = Math.min(1.1*u, w);
+    ctx.fillStyle = "#ffe3e6"; ctx.strokeStyle = "#d62839"; ctx.lineWidth = 3; rrect(x, yb - h, w, h, 8); ctx.fill(); ctx.stroke();
+    ctx.font = `bold ${Math.round(h*0.5)}px system-ui`; ctx.fillStyle = "#d62839"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("?", x + w/2, yb - h/2); ctx.textBaseline = "alphabetic";
+    ctx.font = `bold ${FS}px system-ui, sans-serif`; ctx.fillText(`${f.ask}`, x + w/2, yb + FS + 10);
+    return [];
+  },
   sig(f, box, k){
     const [bx,by,bw,bh] = box, cx = bx + bw/2, cy = by + bh/2, S = Math.min(bh*0.5, 120*k);
     ctx.fillStyle = "#3a2a10"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -1215,6 +1233,7 @@ function drawShape(s, cx, cy, k){
   if (g.circles) for (const [x,y,r] of g.circles){ ctx.beginPath(); ctx.arc(cx+x*k, cy+y*k, r*k, 0, 2*Math.PI); ctx.fill(); ctx.stroke(); }
 }
 function svgShape(s){
+  if (s.txt){ const fs = Math.min(44, Math.round(150 / Math.max(1, s.txt.length))); return `<svg viewBox="-50 -50 100 100" aria-hidden="true"><text x="0" y="${Math.round(fs*0.35)}" font-size="${fs}" font-weight="700" text-anchor="middle" fill="#1b3a6b" font-family="system-ui, sans-serif">${s.txt}</text></svg>`; }
   const g = shapeGeo(s);
   let inner = g.poly ? `<polygon points="${g.poly.map(p => p.map(v => v.toFixed(1)).join(",")).join(" ")}" fill="${s.fill}" stroke="#222" stroke-width="2.5"/>` : "";
   if (g.circles) inner = g.circles.map(([x,y,r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${s.fill}" stroke="#222" stroke-width="2.5"/>`).join("");
@@ -1223,7 +1242,7 @@ function svgShape(s){
 function drawFig(p, box, k){
   const [bx,by,bw,bh] = box, f = p.fig;
   ctx.fillStyle = "#f4e6c3"; ctx.strokeStyle = "#8a6a3a"; ctx.lineWidth = 4; rrect(bx,by,bw,bh,10); ctx.fill(); ctx.stroke();
-  const fs = Math.round(9*k), foot = fs + 14, vol = !["seq","vseq","sig"].includes(f.t);
+  const fs = Math.round(9*k), foot = fs + 14, vol = !["seq","vseq","sig","stairs","sticks"].includes(f.t);
   if (vol){ ctx.font = `${fs}px 'Press Start 2P'`; ctx.fillStyle = "#8a6a3a"; ctx.textAlign = "left"; ctx.fillText("Diagrama aproximado", bx+10, by+bh-10); }
   const inner = [bx+4, by+4, bw-8, bh-8-(vol ? foot : 0)];
   ctx.save(); const labs = FIG[f.t](f, inner, k) || []; ctx.restore();
@@ -1347,7 +1366,7 @@ try { const v = localStorage.getItem(SAVE_KEY + ".misiones"); if (v !== null) qu
 function renderMapUI(){
   if (state !== "map") return;
   const tot = ST.correct + ST.wrong, done = questsDone(), N = MAIN.length, cur = curQuest();
-  const MIN = {1:5,2:5,3:5,4:6,5:5,6:4,7:4,8:5};
+  const MIN = {1:5,2:5,3:5,4:6,5:5,6:4,7:4,8:4};
   const items = QUESTS.map(q => {
     const ok = q.done(), cls = ok ? "done" : q === cur ? "cur" : "";
     return `<li class="${cls}">${ok ? "✅" : q === cur ? "👉" : "⬜"} ${q.t}${q.prog && !ok ? ` (${q.prog()})` : ""}${q.k && !ok ? ` <small>~${MIN[q.k]} min</small>` : ""}</li>`;
@@ -1389,7 +1408,7 @@ function renderBattle(){
       ${B.note ? `<div style="color:#b8b5d1;margin-bottom:6px">${B.note}</div>` : ""}
       <div class="q">${p.text}</div>
       ${p.datos || ""}
-      <div class="hintbox">${p.hints.slice(0,B.hint).map((h,i)=>`💡 ${choice ? "Pista" : i ? "Sustituye" : "Fórmula"}: ${h}`).join("<br>")}</div>
+      <div class="hintbox">${p.hints.slice(0,B.hint).map((h,i)=>`💡 ${choice || p.plain ? "Pista" : i ? "Sustituye" : "Fórmula"}: ${h}`).join("<br>")}</div>
       ${choice ? `<div class="opts">${p.opts.map((o,i) => `<button type="button" data-i="${i}">${svgShape(o.s)}<span>${"ABCD"[i]}</span></button>`).join("")}</div>`
       : `<form class="row" id="af" autocomplete="off"><input id="ans" ${TOUCH?'inputmode="none"':'inputmode="decimal"'} class="${B.calcOpen?"":"tgt"}" placeholder="Tu respuesta${p.unit?` (${p.unit})`:""}" value="${prev}"><button type="submit">⚔️ Responder</button></form>
          ${TOUCH && !B.calcOpen ? keypadHTML() : ""}`}
